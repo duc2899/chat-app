@@ -12,15 +12,15 @@ import {
 const Profile_Menu = [
   {
     title: "Profile",
-    icon: <User />,
+    icon: <User size={20} />,
   },
   {
     title: "Settings",
-    icon: <Gear />,
+    icon: <Gear size={20} />,
   },
   {
-    title: "Profile",
-    icon: <SignOut />,
+    title: "Sign Out",
+    icon: <SignOut size={20} />,
   },
 ];
 
@@ -28,21 +28,22 @@ const Nav_Buttons = [
   {
     index: 0,
     icon: <ChatCircleDots />,
+    link: "/app",
   },
   {
     index: 1,
     icon: <Users />,
+    link: "/groups",
   },
   {
     index: 2,
     icon: <Phone />,
+    link: "/phone",
   },
-];
-
-const Nav_Setting = [
   {
     index: 3,
     icon: <GearSix />,
+    link: "/settings",
   },
 ];
 
@@ -199,13 +200,55 @@ const Chat_History = [
   },
 ];
 
+const SHARED_LINKS = [
+  {
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.cats(),
+    message: "Yep, I can also do that",
+    incoming: true,
+    outgoing: false,
+  },
+  {
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.cats(),
+    message: "Yep, I can also do that",
+    incoming: true,
+    outgoing: false,
+  },
+];
+
+const SHARED_DOCS = [
+  {
+    type: "msg",
+    subtype: "doc",
+    message: "Yes sure, here you go.",
+    incoming: true,
+    outgoing: false,
+    filename: "FrontEnd.excel",
+    doctype: "EXCEL",
+  },
+  {
+    type: "msg",
+    subtype: "doc",
+    message: "Yes sure, here you go.1",
+    incoming: true,
+    outgoing: false,
+    filename: "FrontEnd.docx",
+    doctype: "WORD",
+  },
+  {
+    type: "msg",
+    subtype: "doc",
+    message: "Yes sure, here you go.1",
+    incoming: true,
+    outgoing: false,
+    filename: "FrontEnd.pdf",
+    doctype: "PDF",
+  },
+];
 const Message_options = [
-  {
-    title: "Reply",
-  },
-  {
-    title: "React to message",
-  },
   {
     title: "Forward message",
   },
@@ -222,9 +265,10 @@ const Message_options = [
 
 export {
   Profile_Menu,
-  Nav_Setting,
   Nav_Buttons,
   ChatList,
   Chat_History,
   Message_options,
+  SHARED_DOCS,
+  SHARED_LINKS,
 };

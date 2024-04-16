@@ -69,10 +69,10 @@ const SettingsProvider = ({ children }) => {
     });
   };
 
-  const onChangeMode = (event) => {
+  const onChangeMode = (value) => {
     setSettings({
       ...settings,
-      themeMode: event.target.value,
+      themeMode: value,
     });
   };
 
@@ -203,6 +203,6 @@ const SettingsProvider = ({ children }) => {
   );
 };
 
-export {SettingsContext};
+export { SettingsContext };
 
 export default SettingsProvider;
