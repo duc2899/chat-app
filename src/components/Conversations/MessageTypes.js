@@ -100,7 +100,7 @@ const DocMessage = ({ el }) => {
           variant="body2"
           sx={{
             color: el.incoming ? theme.palette.text : "#fff",
-            marginTop: "5px"
+            marginTop: "5px",
           }}
         >
           {el.message}
@@ -273,11 +273,10 @@ const ReplyMessage = ({ el }) => {
     </Stack>
   );
 };
-const TimeLine = ({ el, key }) => {
+const TimeLine = ({ el }) => {
   const theme = useTheme();
   return (
     <Stack
-      key={key}
       direction={"row"}
       alignItems={"center"}
       justifyContent={"space-between"}

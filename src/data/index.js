@@ -38,7 +38,7 @@ const Nav_Buttons = [
   {
     index: 2,
     icon: <Phone />,
-    link: "/phone",
+    link: "/calls",
   },
   {
     index: 3,

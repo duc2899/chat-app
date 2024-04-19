@@ -9,6 +9,10 @@ const initialState = {
     open: true,
     type: "SETTING",
   },
+  searchTextBox: {
+    open: false,
+    type: "TEXTBOXSEARCH",
+  },
 };
 
 const slice = createSlice({
@@ -23,6 +27,9 @@ const slice = createSlice({
     },
     updateSettingType(state, action) {
       state.settings.type = action.payload.type;
+    },
+    toggleTextBox(state) {
+      state.searchTextBox.open = !state.searchTextBox.open;
     },
   },
 });
@@ -52,5 +59,11 @@ export function UpdateSettingType(type) {
         type,
       })
     );
+  };
+}
+
+export function ToggleTextBox(type) {
+  return async () => {
+    dispatch(slice.actions.toggleTextBox());
   };
 }

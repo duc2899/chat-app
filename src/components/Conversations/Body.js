@@ -1,8 +1,14 @@
 import { Box, Stack, useTheme } from "@mui/material";
 import React from "react";
 import { Chat_History } from "../../data";
-import { DocMessage, LinkMessage, MediaMessage, ReplyMessage, TextMessage, TimeLine } from "./MessageTypes";
-
+import {
+  DocMessage,
+  LinkMessage,
+  MediaMessage,
+  ReplyMessage,
+  TextMessage,
+  TimeLine,
+} from "./MessageTypes";
 
 const Body = () => {
   return (
@@ -11,26 +17,24 @@ const Body = () => {
         {Chat_History.map((el, i) => {
           switch (el.type) {
             case "divider":
-              return (
-                <TimeLine el={el} key={i}></TimeLine>
-              )
+              return <TimeLine el={el} key={i}></TimeLine>;
             case "msg":
               switch (el.subtype) {
                 case "img":
-                  return <MediaMessage el={el}></MediaMessage>
+                  return <MediaMessage key={i} el={el}></MediaMessage>;
                 case "doc":
-                  return <DocMessage el={el}></DocMessage>
+                  return <DocMessage key={i} el={el}></DocMessage>;
                 case "link":
-                  return (<LinkMessage el={el}></LinkMessage>)
+                  return <LinkMessage key={i} el={el}></LinkMessage>;
                 case "reply":
-                  return (<ReplyMessage el={el}></ReplyMessage>)
+                  return <ReplyMessage key={i} el={el}></ReplyMessage>;
                 default:
-                  return <TextMessage el={el}></TextMessage>
-                  // Text msg
+                  return <TextMessage key={i} el={el}></TextMessage>;
+                // Text msg
               }
 
             default:
-              <></>
+              <></>;
           }
         })}
       </Stack>

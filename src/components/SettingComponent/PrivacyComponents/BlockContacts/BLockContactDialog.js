@@ -5,7 +5,6 @@ import {
   DialogTitle,
   Divider,
   IconButton,
-  Slide,
   Typography,
 } from "@mui/material";
 import { MagnifyingGlass, X } from "phosphor-react";
@@ -17,9 +16,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Search, { SearchIconWrapper, StyledInputBase } from "../../../Search";
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import Transition from "../../../Transition";
 
 const BLockContactDialog = ({ open, handleClose, listUsers }) => {
   const theme = useTheme();

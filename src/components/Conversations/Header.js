@@ -13,7 +13,11 @@ import { CaretDown, MagnifyingGlass, Phone, VideoCamera } from "phosphor-react";
 
 import React from "react";
 
-import { ToggleSidebar, UpdateSidebarType } from "../../redux/slices/app";
+import {
+  ToggleSidebar,
+  UpdateSidebarType,
+  ToggleTextBox,
+} from "../../redux/slices/app";
 import { useDispatch } from "react-redux";
 
 const Headers = () => {
@@ -36,15 +40,15 @@ const Headers = () => {
         p={2}
       >
         <Stack
-        sx={{
-            cursor:"pointer"
-        }}
+          sx={{
+            cursor: "pointer",
+          }}
           direction={"row"}
           spacing={1.5}
           alignItems={"center"}
           onClick={() => {
             dispatch(ToggleSidebar());
-            dispatch(UpdateSidebarType("CONTACT"))
+            dispatch(UpdateSidebarType("CONTACT"));
           }}
         >
           <StyledBadge
@@ -82,7 +86,7 @@ const Headers = () => {
             <IconButton>
               <Phone size={24} />
             </IconButton>
-            <IconButton>
+            <IconButton onClick={() => dispatch(ToggleTextBox())}>
               <MagnifyingGlass size={24} />
             </IconButton>
             <Divider orientation="vertical" flexItem></Divider>

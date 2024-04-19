@@ -13,16 +13,15 @@ import { ArchiveBox, CircleDashed, MagnifyingGlass } from "phosphor-react";
 import React from "react";
 import { ChatList } from "../../data";
 import { SimpleBarStyle } from "../../components/Scrollbar";
-import { styled } from "@mui/material/styles";
 import Search, {
   SearchIconWrapper,
   StyledInputBase,
 } from "../../components/Search";
-const ChatElement = ({ id, img, name, msg, time, unread, online }) => {
+import StyledBadge from "../../components/StyledBadge";
+const ChatElement = ({ img, name, msg, time, unread, online }) => {
   const theme = useTheme();
   return (
     <Box
-      key={id}
       sx={{
         backgroundColor:
           theme.palette.mode === "light"
@@ -66,34 +65,6 @@ const ChatElement = ({ id, img, name, msg, time, unread, online }) => {
     </Box>
   );
 };
-const StyledBadge = styled(Badge)(({ theme }) => ({
-  "& .MuiBadge-badge": {
-    backgroundColor: "#44b700",
-    color: "#44b700",
-    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-    "&::after": {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      borderRadius: "50%",
-      animation: "ripple 1.2s infinite ease-in-out",
-      border: "1px solid currentColor",
-      content: '""',
-    },
-  },
-  "@keyframes ripple": {
-    "0%": {
-      transform: "scale(.8)",
-      opacity: 1,
-    },
-    "100%": {
-      transform: "scale(2.4)",
-      opacity: 0,
-    },
-  },
-}));
 
 const Chats = () => {
   const theme = useTheme();
@@ -102,7 +73,7 @@ const Chats = () => {
     <Box
       sx={{
         position: "relative",
-        width: 320,
+        width: 420,
         backgroundColor:
           theme.palette.mode === "light"
             ? "rgba(248, 250, 255, 1)"
@@ -155,17 +126,23 @@ const Chats = () => {
             height: "100%",
           }}
         >
-          <SimpleBarStyle timeout={500} clickOnTrack={false}>
+          <SimpleBarStyle
+            timeout={500}
+            clickOnTrack={false}
+            sx={{
+              paddingRight: "10px",
+            }}
+          >
             <Stack spacing={1}>
               <Typography variant="subtitle2">Pinned</Typography>
               {ChatList.filter((el) => el.pinned).map((el) => (
-                <ChatElement {...el}></ChatElement>
+                <ChatElement key={el.id} {...el}></ChatElement>
               ))}
             </Stack>
             <Stack spacing={1}>
               <Typography variant="subtitle2">All Chats</Typography>
               {ChatList.filter((el) => !el.pinned).map((el) => (
-                <ChatElement {...el}></ChatElement>
+                <ChatElement key={el.id} {...el}></ChatElement>
               ))}
             </Stack>
           </SimpleBarStyle>
