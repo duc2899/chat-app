@@ -3,9 +3,13 @@ import * as Yup from "yup";
 import FormProvider from "../../components/hook-form/FormProvider";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Alert, Button, Stack } from "@mui/material";
+import { Alert, Stack } from "@mui/material";
 import RHFTextField from "../../components/hook-form/RHFTextField";
+import { useDispatch } from "react-redux";
+import { ForgotPassword } from "../../redux/slices/auth";
+import RHFButtonSubmit from "../../components/hook-button/RHFButtonSubmit";
 const ResetPasswordForm = () => {
+  const dispatch = useDispatch();
   const ResetPasswordSchema = Yup.object().shape({
     email: Yup.string()
       .required("Email is required")
@@ -24,7 +28,7 @@ const ResetPasswordForm = () => {
 
   const onSubmit = async (data) => {
     try {
-      console.log(data);
+      dispatch(ForgotPassword(data));
     } catch (error) {
       console.log(error);
       reset();
@@ -42,26 +46,7 @@ const ResetPasswordForm = () => {
         )}
       </Stack>
       <RHFTextField name={"email"} label="Email"></RHFTextField>
-      <Button
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        sx={{
-          marginTop: "15px",
-          bgcolor: "text.primary",
-          color: (theme) =>
-            theme.palette.mode === "light" ? "common.white" : "grey.800",
-          "&:hover": {
-            bgcolor: "text.primary",
-            color: (theme) =>
-              theme.palette.mode === "light" ? "common.white" : "grey.800",
-          },
-        }}
-      >
-        Submit
-      </Button>
+      <RHFButtonSubmit text={"Submit"}></RHFButtonSubmit>
     </FormProvider>
   );
 };

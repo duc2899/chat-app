@@ -4,10 +4,14 @@ import FormProvider from "../../components/hook-form/FormProvider";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Eye, EyeSlash } from "phosphor-react";
-import { Alert, Button, IconButton, InputAdornment, List } from "@mui/material";
+import { Alert, IconButton, InputAdornment, List } from "@mui/material";
 import RHFTextField from "../../components/hook-form/RHFTextField";
+import { useDispatch } from "react-redux";
+import { RegisterUser } from "../../redux/slices/auth";
+import RHFButtonSubmit from "../../components/hook-button/RHFButtonSubmit";
 
 const RegisterForm = () => {
+  const dispatch = useDispatch();
   const [showPass, setShowPass] = React.useState(false);
   const RegisterSchema = Yup.object().shape({
     firstName: Yup.string().required("First Name is required"),
@@ -33,7 +37,7 @@ const RegisterForm = () => {
 
   const onSubmit = async (data) => {
     try {
-      console.log(data);
+      dispatch(RegisterUser(data));
     } catch (error) {
       console.log(error);
       reset();
@@ -84,26 +88,7 @@ const RegisterForm = () => {
           ),
         }}
       ></RHFTextField>
-      <Button
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        sx={{
-          bgcolor: "text.primary",
-          marginTop: "20px",
-          color: (theme) =>
-            theme.palette.mode === "light" ? "common.white" : "grey.800",
-          "&:hover": {
-            bgcolor: "text.primary",
-            color: (theme) =>
-              theme.palette.mode === "light" ? "common.white" : "grey.800",
-          },
-        }}
-      >
-        Register
-      </Button>
+      <RHFButtonSubmit text={"Register"}></RHFButtonSubmit>
     </FormProvider>
   );
 };

@@ -39,6 +39,10 @@ export default function Router() {
           element: <NewPasswordPage></NewPasswordPage>,
           path: "newPassword",
         },
+        {
+          element: <VerifyOTPPage></VerifyOTPPage>,
+          path: "verify",
+        },
       ],
     },
     {
@@ -50,6 +54,7 @@ export default function Router() {
         { path: "settings", element: <Settings /> },
         { path: "groups", element: <GroupPage /> },
         { path: "calls", element: <CallsPage /> },
+        { path: "profile", element: <ProfilePage /> },
 
         { path: "404", element: <Page404 /> },
         { path: "*", element: <Navigate to="/404" replace /> },
@@ -72,7 +77,10 @@ const NewPasswordPage = Loadable(
   lazy(() => import("../pages/Auth/NewPassword"))
 );
 
+const VerifyOTPPage = Loadable(lazy(() => import("../pages/Auth/VerifyOTP")));
+
 const Settings = Loadable(lazy(() => import("../pages/dashboard/Settings")));
 const GroupPage = Loadable(lazy(() => import("../pages/dashboard/Groups")));
 const CallsPage = Loadable(lazy(() => import("../pages/dashboard/Calls")));
+const ProfilePage = Loadable(lazy(() => import("../pages/dashboard/Profile")));
 const Page404 = Loadable(lazy(() => import("../pages/Page404")));

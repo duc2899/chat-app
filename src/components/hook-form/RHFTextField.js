@@ -7,7 +7,12 @@ RHFTextField.propTypes = {
   helperText: PropTypes.node,
 };
 
-export default function RHFTextField({ name, helperText, ...other }) {
+export default function RHFTextField({
+  name,
+  helperText,
+  disabled = false,
+  ...other
+}) {
   const { control } = useFormContext();
   return (
     <Controller
@@ -20,6 +25,7 @@ export default function RHFTextField({ name, helperText, ...other }) {
           error={!!error}
           helperText={error ? error.message : helperText}
           {...other}
+          disabled={disabled}
         />
       )}
     ></Controller>

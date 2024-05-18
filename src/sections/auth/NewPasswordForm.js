@@ -4,16 +4,22 @@ import FormProvider from "../../components/hook-form/FormProvider";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Eye, EyeSlash } from "phosphor-react";
-import { Alert, Button, IconButton, InputAdornment, List } from "@mui/material";
+import { Alert, IconButton, InputAdornment, List } from "@mui/material";
 import RHFTextField from "../../components/hook-form/RHFTextField";
+import { useSearchParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { ResetPassword } from "../../redux/slices/auth";
+import RHFButtonSubmit from "../../components/hook-button/RHFButtonSubmit";
 const NewPasswordForm = () => {
+  const dispatch = useDispatch();
+  const [queryParams] = useSearchParams();
   const [showNewPass, setShowNewPass] = React.useState(false);
   const [showConfirmPass, setShowConfirmPass] = React.useState(false);
   const NewPasswordSchema = Yup.object().shape({
     newPassword: Yup.string()
       .required("Password is required")
-      .min(5, "Please enter a password between 5 and 10 characters long")
-      .max(10, "Please enter a password between 5 and 10 characters long"),
+      .min(3, "Please enter a password between 5 and 10 characters long")
+      .max(15, "Please enter a password between 5 and 10 characters long"),
     confirmPassword: Yup.string().oneOf(
       [Yup.ref("newPassword"), null],
       "Password must be match"
@@ -26,12 +32,16 @@ const NewPasswordForm = () => {
     reset,
     setError,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors },
   } = methods;
 
   const onSubmit = async (data) => {
     try {
-      console.log(data);
+      const newData = {
+        password: data.newPassword,
+        token: queryParams.get("code"),
+      };
+      dispatch(ResetPassword(newData));
     } catch (error) {
       console.log(error);
       reset();
@@ -79,26 +89,7 @@ const NewPasswordForm = () => {
           ),
         }}
       ></RHFTextField>
-      <Button
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        sx={{
-          bgcolor: "text.primary",
-          marginTop: "20px",
-          color: (theme) =>
-            theme.palette.mode === "light" ? "common.white" : "grey.800",
-          "&:hover": {
-            bgcolor: "text.primary",
-            color: (theme) =>
-              theme.palette.mode === "light" ? "common.white" : "grey.800",
-          },
-        }}
-      >
-        Submit
-      </Button>
+      <RHFButtonSubmit text={"Submit"}></RHFButtonSubmit>
     </FormProvider>
   );
 };

@@ -10,29 +10,55 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useSettings from "../../hooks/useSettings";
 import logo from "../../assets/Images/logo.ico";
 import { Nav_Buttons, Profile_Menu } from "../../data";
-import { deepOrange } from "@mui/material/colors";
 import AntSwitch from "../../components/AntSwitch";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { LogoutOut } from "../../redux/slices/auth";
+import { FetchUserProfile } from "../../redux/slices/auth";
 
 const SideBar = () => {
+  const dispatch = useDispatch();
+  const { user } = useSelector((store) => store.auth);
   const theme = useTheme();
+  const navigate = useNavigate();
   const location = window.location.pathname;
   const { onToggleMode } = useSettings();
   const [selected, setSelected] = useState(location);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
+  useEffect(() => {
+    dispatch(FetchUserProfile());
+  }, []);
+
+  const getPath = (index) => {
+    switch (index) {
+      case 0:
+        return "profile";
+
+      case 1:
+        return "settings";
+
+      default:
+        break;
+    }
+  };
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = () => {
+  const handleClose = (e) => {
+    if (e === 2) {
+      return dispatch(LogoutOut());
+    }
+    navigate(`/${getPath(e)}`);
     setAnchorEl(null);
   };
+
   return (
     <Box
       p={2}
@@ -127,7 +153,7 @@ const SideBar = () => {
               aria-haspopup="true"
               aria-expanded={open ? "true" : undefined}
             >
-              <Avatar sx={{ bgcolor: deepOrange[500] }}>N</Avatar>
+              <Avatar src={user?.avatar}></Avatar>
             </IconButton>
           </Tooltip>
         </Stack>
@@ -135,8 +161,6 @@ const SideBar = () => {
           anchorEl={anchorEl}
           id="account-menu"
           open={open}
-          onClose={handleClose}
-          onClick={handleClose}
           PaperProps={{
             elevation: 0,
             sx: {
@@ -167,7 +191,7 @@ const SideBar = () => {
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
           {Profile_Menu.map((el, i) => (
-            <MenuItem key={i} onClick={handleClose}>
+            <MenuItem key={i} onClick={() => handleClose(i)}>
               <ListItemIcon>{el.icon}</ListItemIcon>
               {el.title}
             </MenuItem>

@@ -2,7 +2,6 @@ import React from "react";
 import { Box, Stack, Typography, Link } from "@mui/material";
 import logo from "../../assets/Images/logo.ico";
 import { Link as RouterLink } from "react-router-dom";
-import ResetPasswordForm from "../../sections/auth/ResetPasswordForm";
 import { CaretLeft } from "phosphor-react";
 import NewPasswordForm from "../../sections/auth/NewPasswordForm";
 
