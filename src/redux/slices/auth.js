@@ -62,6 +62,7 @@ const handelError = (error, dispatch) => {
     })
   );
   if (error.response.status === 401) {
+    window.localStorage.removeItem("user_id");
     dispatch(
       slice.actions.signOut({
         isLoggedIn: false,
@@ -98,6 +99,8 @@ export function LoginUser(formValue) {
             token: res.data.data.token,
           })
         );
+
+        window.localStorage.setItem("user_id", res.data.data.user_id);
         dispatch(
           ShowSnakeBar({
             message: res.data.message,
@@ -127,6 +130,7 @@ export function LogoutOut() {
         user: {},
       })
     );
+    window.localStorage.removeItem("user_id");
     dispatch(
       ShowSnakeBar({
         message: "Logout Success",
@@ -246,6 +250,7 @@ export function VerifyOTP(formValue) {
               token: res.data.data.token,
             })
           );
+          window.localStorage.setItem("user_id", res.data.data.id);
           dispatch(
             ShowSnakeBar({
               message: res.data.message,
@@ -400,7 +405,7 @@ export const FetchUserProfile = () => {
 export const UpdateUserProfile = (formValues) => {
   return async (dispatch, getState) => {
     fetchAxios
-      .post(
+      .patch(
         UPDATE_ME,
         {
           ...formValues,

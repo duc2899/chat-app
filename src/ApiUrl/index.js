@@ -6,6 +6,9 @@ const VERIFY_OTP = "/auth/verify";
 const SEND_OTP = "/auth/sendOTP";
 const GET_ME = "/user/getMe";
 const UPDATE_ME = "user/updateMe";
+const GET_USERS = "/user/getUsers";
+const GET_FRIENDS = "/user/getFriends";
+const GET_FRIENDS_REQUEST = "/user/getFriendRequests";
 export {
   LOGIN_USER,
   REGISTER_USER,
@@ -15,4 +18,7 @@ export {
   SEND_OTP,
   GET_ME,
   UPDATE_ME,
+  GET_USERS,
+  GET_FRIENDS,
+  GET_FRIENDS_REQUEST,
 };

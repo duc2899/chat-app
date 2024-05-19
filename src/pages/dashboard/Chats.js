@@ -1,6 +1,4 @@
 import {
-  Avatar,
-  Badge,
   Box,
   Button,
   Divider,
@@ -9,66 +7,39 @@ import {
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { ArchiveBox, CircleDashed, MagnifyingGlass } from "phosphor-react";
-import React from "react";
-import { ChatList } from "../../data";
+import {
+  ArchiveBox,
+  CircleDashed,
+  MagnifyingGlass,
+  UsersThree,
+} from "phosphor-react";
+import React, { useEffect } from "react";
 import { SimpleBarStyle } from "../../components/Scrollbar";
 import Search, {
   SearchIconWrapper,
   StyledInputBase,
 } from "../../components/Search";
-import StyledBadge from "../../components/StyledBadge";
-const ChatElement = ({ img, name, msg, time, unread, online }) => {
-  const theme = useTheme();
-  return (
-    <Box
-      sx={{
-        backgroundColor:
-          theme.palette.mode === "light"
-            ? "#fff"
-            : theme.palette.background.paper,
-        borderRadius: 2,
-        height: 80,
-        width: "100%",
-      }}
-      p={2}
-    >
-      <Stack
-        direction={"row"}
-        alignItems={"center"}
-        justifyContent={"space-between"}
-      >
-        <Stack direction={"row"} spacing={2}>
-          {online ? (
-            <StyledBadge
-              overlap="circular"
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              variant="dot"
-            >
-              <Avatar src={img}></Avatar>
-            </StyledBadge>
-          ) : (
-            <Avatar src={img}></Avatar>
-          )}
-          <Stack spacing={0.5}>
-            <Typography variant="subtitle2">{name}</Typography>
-            <Typography variant="caption">{msg}</Typography>
-          </Stack>
-        </Stack>
-        <Stack alignItems={"center"} spacing={2}>
-          <Typography variant="p" fontSize={12}>
-            {time}
-          </Typography>
-          <Badge color="primary" badgeContent={unread}></Badge>
-        </Stack>
-      </Stack>
-    </Box>
-  );
-};
+import FriendsDialog from "../../sections/main/FriendsDialog";
+import ChatElement from "../../components/ChatElement";
+import { socket } from "../../socket";
+import { useSelector } from "react-redux";
 
 const Chats = () => {
+  const { userId } = useSelector((store) => store.auth);
+  const { conversations } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
   const theme = useTheme();
-
+  const [dialog, setDialog] = React.useState(false);
+  const handelClose = () => {
+    setDialog(false);
+  };
+  const handelOpen = () => {
+    setDialog(true);
+  };
+  useEffect(() => {
+    socket.emit("get_direct_conversation", { userId }, (data) => {});
+  }, []);
   return (
     <Box
       sx={{
@@ -96,9 +67,18 @@ const Chats = () => {
           <Typography variant="h4" border={""}>
             Chats
           </Typography>
-          <IconButton>
-            <CircleDashed></CircleDashed>
-          </IconButton>
+          <Stack
+            direction={"row"}
+            alignItems={"center"}
+            justifyContent={"center"}
+          >
+            <IconButton>
+              <CircleDashed></CircleDashed>
+            </IconButton>
+            <IconButton onClick={() => handelOpen()}>
+              <UsersThree />
+            </IconButton>
+          </Stack>
         </Stack>
         <Search>
           <SearchIconWrapper>
@@ -135,19 +115,26 @@ const Chats = () => {
           >
             <Stack spacing={1}>
               <Typography variant="subtitle2">Pinned</Typography>
-              {ChatList.filter((el) => el.pinned).map((el) => (
-                <ChatElement key={el.id} {...el}></ChatElement>
-              ))}
+              {conversations
+                .filter((el) => el.pinned)
+                .map((el) => (
+                  <ChatElement key={el.id} {...el}></ChatElement>
+                ))}
             </Stack>
             <Stack spacing={1}>
               <Typography variant="subtitle2">All Chats</Typography>
-              {ChatList.filter((el) => !el.pinned).map((el) => (
-                <ChatElement key={el.id} {...el}></ChatElement>
-              ))}
+              {conversations
+                .filter((el) => !el.pinned)
+                .map((el) => (
+                  <ChatElement key={el.id} {...el}></ChatElement>
+                ))}
             </Stack>
           </SimpleBarStyle>
         </Stack>
       </Stack>
+      {dialog && (
+        <FriendsDialog open={dialog} handleClose={handelClose}></FriendsDialog>
+      )}
     </Box>
   );
 };

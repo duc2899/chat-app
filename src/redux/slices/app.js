@@ -1,5 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
-
+import fetchAxios from "../../utils/axios";
+import { GET_FRIENDS, GET_FRIENDS_REQUEST, GET_USERS } from "../../ApiUrl";
+import { LogoutOut } from "./auth";
 const initialState = {
   sideBar: {
     type: "CONTACT",
@@ -17,6 +19,11 @@ const initialState = {
     message: null,
     severity: null,
   },
+  users: [],
+  friends: [],
+  friendsRequest: [],
+  chat_type: null,
+  room_id: null,
 };
 
 const slice = createSlice({
@@ -44,6 +51,19 @@ const slice = createSlice({
       state.snackBar.open = null;
       state.snackBar.message = null;
       state.snackBar.severity = null;
+    },
+    updateUsers(state, action) {
+      state.users = action.payload.users;
+    },
+    updateFriends(state, action) {
+      state.friends = action.payload.friends;
+    },
+    updateFriendsRequest(state, action) {
+      state.friendsRequest = action.payload.friendsRequest;
+    },
+    selectConversation(state, action) {
+      state.chat_type = "individual";
+      state.room_id = action.payload.room_id;
     },
   },
 });
@@ -99,5 +119,102 @@ export function ShowSnakeBar({ message, severity }) {
 export function HideSnakeBar() {
   return async (dispatch, getState) => {
     dispatch(slice.actions.closeSnakeBar());
+  };
+}
+
+const handelError = (error, dispatch) => {
+  dispatch(
+    ShowSnakeBar({
+      message: error.response.data.message,
+      severity: "error",
+    })
+  );
+  if (error.response.status === 401) {
+    dispatch(LogoutOut);
+  }
+};
+
+export function FetchUsers() {
+  return async (dispatch, getState) => {
+    fetchAxios
+      .post(
+        GET_USERS,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getState().auth.token}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response.data);
+        // dispatch(slice.actions.updateUsers({
+        //   users: response.data.data
+        // }))
+      })
+      .catch((error) => {
+        handelError(error, dispatch);
+      });
+  };
+}
+
+export function FetchFriends() {
+  return async (dispatch, getState) => {
+    fetchAxios
+      .post(
+        GET_FRIENDS,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getState().auth.token}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response.data);
+        // dispatch(slice.actions.updateUsers({
+        //   users: response.data.data
+        // }))
+      })
+      .catch((error) => {
+        handelError(error, dispatch);
+      });
+  };
+}
+
+export function FetchFriendsRequest() {
+  return async (dispatch, getState) => {
+    fetchAxios
+      .post(
+        GET_FRIENDS_REQUEST,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getState().auth.token}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response.data);
+        // dispatch(slice.actions.updateUsers({
+        //   users: response.data.data
+        // }))
+      })
+      .catch((error) => {
+        handelError(error, dispatch);
+      });
+  };
+}
+
+export function SelectConversation({ room_id }) {
+  return (dispatch, getState) => {
+    dispatch(
+      slice.actions.selectConversation({
+        room_id: room_id,
+      })
+    );
   };
 }

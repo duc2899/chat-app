@@ -5,8 +5,10 @@ import { Box, Stack } from "@mui/material";
 import Contact from "../../components/Contact";
 import { useSelector } from "react-redux";
 import MediaMessage from "../../components/MediaMessage";
+import ConversationStart from "../../components/ConversationStart";
+
 const GeneralApp = () => {
-  const { sideBar } = useSelector((store) => store.app);
+  const { sideBar, room_id, chat_type } = useSelector((store) => store.app);
 
   return (
     <Stack sx={{ width: "100%", overflow: "hidden" }} direction={"row"}>
@@ -18,7 +20,11 @@ const GeneralApp = () => {
           backgroundColor: "#fff",
         }}
       >
-        <Conversation></Conversation>
+        {room_id !== null && chat_type === "individual" ? (
+          <Conversation></Conversation>
+        ) : (
+          <ConversationStart></ConversationStart>
+        )}
       </Box>
       {sideBar.open &&
         (() => {
@@ -26,9 +32,9 @@ const GeneralApp = () => {
             case "CONTACT":
               return <Contact></Contact>;
             case "MEDIA":
-              return <MediaMessage></MediaMessage>
-            default:  
-              return <div>Error</div>
+              return <MediaMessage></MediaMessage>;
+            default:
+              return <div>Error</div>;
           }
         })()}
     </Stack>

@@ -1,8 +1,7 @@
 import React from "react";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useSelector } from "react-redux";
-import settingImage from "../../assets/Images/Call Service.png";
 import SettingsPanel from "../../components/SettingComponent/SettingsPanel";
 import NotificationsPanel from "../../components/SettingComponent/NotificationsPanel";
 import PrivacyPanel from "../../components/SettingComponent/PrivacyComponents/PrivacyPanel";
@@ -11,6 +10,7 @@ import BlockContactsPanel from "../../components/SettingComponent/PrivacyCompone
 import SecurityPanel from "../../components/SettingComponent/SecurityPanel";
 import HelpPanel from "../../components/SettingComponent/HelpPanel";
 import RequestAccountPanel from "../../components/SettingComponent/RequestAccountPanel";
+import ConversationStart from "../../components/ConversationStart";
 const Settings = () => {
   const theme = useTheme();
   const { settings } = useSelector((store) => store.app);
@@ -89,38 +89,7 @@ const Settings = () => {
       </Box>
 
       {/* Right Panel */}
-      <Box
-        sx={{
-          width: "100%",
-          display: "flex",
-        }}
-        justifyContent={"center"}
-        alignItems={"center"}
-      >
-        <Stack direction={"column"} alignItems={"center"}>
-          <img src={settingImage} alt="settingImage"></img>
-          <Typography
-            variant="body2"
-            sx={{
-              display: "inline-flex",
-              gap: "3px",
-              fontWeight: "bold",
-            }}
-          >
-            Select a conversation or start a{" "}
-            <Typography
-              color={theme.palette.primary.main}
-              variant="body2"
-              sx={{
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
-              new one
-            </Typography>
-          </Typography>
-        </Stack>
-      </Box>
+      <ConversationStart></ConversationStart>
     </Stack>
   );
 };
