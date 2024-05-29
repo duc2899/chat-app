@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, Slide, Stack, Tab, Tabs } from "@mui/material";
 import React, { useEffect } from "react";
+import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import {
   FetchFriends,
@@ -11,9 +12,11 @@ import {
   FriendRequestElement,
   UserElement,
 } from "../../components/Friends";
+
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
+
 const UsersList = () => {
   const dispatch = useDispatch();
 
@@ -48,15 +51,13 @@ const FriendsRequestList = () => {
   useEffect(() => {
     dispatch(FetchFriendsRequest());
   }, []);
-
-  return friendsRequest.map((el, i) => (
-    <FriendRequestElement
-      key={i}
-      {...el.sender}
-      id={el._id}
-    ></FriendRequestElement>
-  ));
+  return friendsRequest.map((el, i) => {
+    return (
+      <FriendRequestElement key={i} {...el} id={el._id}></FriendRequestElement>
+    );
+  });
 };
+
 const FriendsDialog = ({ open, handleClose }) => {
   const [value, setValue] = React.useState(0);
 
@@ -100,7 +101,7 @@ const FriendsDialog = ({ open, handleClose }) => {
                 case 2:
                   return <FriendsRequestList></FriendsRequestList>;
                 default:
-                  break;
+                  return null;
               }
             })()}
           </Stack>

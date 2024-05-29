@@ -33,6 +33,7 @@ const slice = createSlice({
       state.isLoggedIn = action.payload.isLoggedIn;
       state.token = action.payload.token;
       state.user = action.payload.user;
+      state.userId = action.payload.userId;
     },
     updateRegisterEmail(state, action) {
       state.email = action.payload.email;
@@ -62,12 +63,12 @@ const handelError = (error, dispatch) => {
     })
   );
   if (error.response.status === 401) {
-    window.localStorage.removeItem("user_id");
     dispatch(
       slice.actions.signOut({
         isLoggedIn: false,
         token: "",
         user: {},
+        userId: "",
       })
     );
   }
@@ -100,7 +101,12 @@ export function LoginUser(formValue) {
           })
         );
 
-        window.localStorage.setItem("user_id", res.data.data.user_id);
+        dispatch(
+          slice.actions.updateUserId({
+            userId: res.data.data.user_id,
+          })
+        );
+
         dispatch(
           ShowSnakeBar({
             message: res.data.message,
@@ -128,9 +134,9 @@ export function LogoutOut() {
         isLoggedIn: false,
         token: "",
         user: {},
+        userId: "",
       })
     );
-    window.localStorage.removeItem("user_id");
     dispatch(
       ShowSnakeBar({
         message: "Logout Success",
@@ -250,7 +256,7 @@ export function VerifyOTP(formValue) {
               token: res.data.data.token,
             })
           );
-          window.localStorage.setItem("user_id", res.data.data.id);
+
           dispatch(
             ShowSnakeBar({
               message: res.data.message,

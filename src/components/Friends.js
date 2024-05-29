@@ -8,9 +8,16 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-import { socket } from "../socket";
+
 import { useTheme } from "@mui/material/styles";
 import { Chat } from "phosphor-react";
+import { useDispatch, useSelector } from "react-redux";
+import { socket } from "../socket";
+import {
+  FetchFriendsRequest,
+  FetchUsers,
+  ShowSnakeBar,
+} from "../redux/slices/app";
 
 const StyledChatBox = styled(Box)(({ theme }) => ({
   "&:hover": {
@@ -47,11 +54,31 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const UserElement = ({ img, firstName, lastName, online, _id }) => {
-  const user_id = window.localStorage.getItem("user_id");
+const UserElement = ({ img, firstName, lastName, status, _id, check }) => {
+  const { userId } = useSelector((store) => store.auth);
   const theme = useTheme();
-
+  const dispatch = useDispatch();
   const name = `${firstName} ${lastName}`;
+
+  const handelSendRequest = () => {
+    if (socket && socket.connected) {
+      socket.emit("friend_request", { to: _id, from: userId }, (res) => {
+        dispatch(FetchUsers());
+      });
+    } else {
+      console.error("Socket is not connected");
+    }
+  };
+
+  const handelRefuseRequest = () => {
+    if (socket && socket.connected) {
+      socket.emit("refuse_friend_request", { to: _id, from: userId }, (res) => {
+        dispatch(FetchUsers());
+      });
+    } else {
+      console.error("Socket is not connected");
+    }
+  };
 
   return (
     <StyledChatBox
@@ -70,8 +97,7 @@ const UserElement = ({ img, firstName, lastName, online, _id }) => {
         justifyContent="space-between"
       >
         <Stack direction="row" alignItems={"center"} spacing={2}>
-          {" "}
-          {online ? (
+          {status === "Online" ? (
             <StyledBadge
               overlap="circular"
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
@@ -86,34 +112,50 @@ const UserElement = ({ img, firstName, lastName, online, _id }) => {
             <Typography variant="subtitle2">{name}</Typography>
           </Stack>
         </Stack>
-        <Stack direction={"row"} spacing={2} alignItems={"center"}>
-          <Button
-            onClick={() => {
-              socket.emit("friend_request", { to: _id, from: user_id }, () => {
-                alert("request sent");
-              });
-            }}
-          >
-            Send Request
-          </Button>
-        </Stack>
+        {check === "sent" ? (
+          <Stack direction={"row"} spacing={2} alignItems={"center"}>
+            <Button onClick={handelRefuseRequest} color="error">
+              Cancel Request
+            </Button>
+          </Stack>
+        ) : (
+          <Stack direction={"row"} spacing={2} alignItems={"center"}>
+            <Button onClick={handelSendRequest}>Send Request</Button>
+          </Stack>
+        )}
       </Stack>
     </StyledChatBox>
   );
 };
 
-const FriendRequestElement = ({
-  img,
-  firstName,
-  lastName,
-  incoming,
-  missed,
-  online,
-  id,
-}) => {
+const FriendRequestElement = ({ sender, _id }) => {
   const theme = useTheme();
-
-  const name = `${firstName} ${lastName}`;
+  const dispatch = useDispatch();
+  const name = `${sender.firstName} ${sender.lastName}`;
+  const handelAcceptRequest = () => {
+    socket.emit(
+      "handel_request",
+      { request_id: _id, isAccept: true },
+      (res) => {
+        if (!res.success) {
+          dispatch(ShowSnakeBar({ message: res.message, severity: "error" }));
+        }
+        dispatch(FetchFriendsRequest());
+      }
+    );
+  };
+  const handelRefuseRequest = () => {
+    socket.emit(
+      "handel_request",
+      { request_id: _id, isAccept: false },
+      (res) => {
+        if (!res.success) {
+          dispatch(ShowSnakeBar({ message: res.message, severity: "error" }));
+        }
+        dispatch(FetchFriendsRequest());
+      }
+    );
+  };
 
   return (
     <StyledChatBox
@@ -129,33 +171,28 @@ const FriendRequestElement = ({
       <Stack
         direction="row"
         alignItems={"center"}
-        justifyContent="space-between"
+        justifyContent="space-around"
       >
         <Stack direction="row" alignItems={"center"} spacing={2}>
-          {" "}
-          {online ? (
+          {sender.status === "Online" ? (
             <StyledBadge
               overlap="circular"
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
             >
-              <Avatar alt={name} src={img} />
+              <Avatar alt={name} src={sender.avatar} />
             </StyledBadge>
           ) : (
-            <Avatar alt={name} src={img} />
+            <Avatar alt={name} src={sender.avatar} />
           )}
           <Stack spacing={0.3}>
             <Typography variant="subtitle2">{name}</Typography>
           </Stack>
         </Stack>
         <Stack direction={"row"} spacing={2} alignItems={"center"}>
-          <Button
-            onClick={() => {
-              //  emit "accept_request" event
-              socket.emit("accept_request", { request_id: id });
-            }}
-          >
-            Accept Request
+          <Button onClick={handelAcceptRequest}>Accept</Button>
+          <Button color="error" onClick={handelRefuseRequest}>
+            Refuse
           </Button>
         </Stack>
       </Stack>
@@ -169,11 +206,11 @@ const FriendElement = ({
   lastName,
   incoming,
   missed,
-  online,
+  status,
   _id,
 }) => {
   const theme = useTheme();
-  const user_id = window.localStorage.getItem("user_id");
+  const { userId } = useSelector((store) => store.auth);
   const name = `${firstName} ${lastName}`;
 
   return (
@@ -193,8 +230,7 @@ const FriendElement = ({
         justifyContent="space-between"
       >
         <Stack direction="row" alignItems={"center"} spacing={2}>
-          {" "}
-          {online ? (
+          {status === "Online" ? (
             <StyledBadge
               overlap="circular"
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
@@ -213,7 +249,7 @@ const FriendElement = ({
           <IconButton
             onClick={() => {
               // start a new conversation
-              socket.emit("start_conversation", { to: _id, from: user_id });
+              socket.emit("start_conversation", { to: _id, from: userId });
             }}
           >
             <Chat />

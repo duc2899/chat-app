@@ -148,10 +148,11 @@ export function FetchUsers() {
         }
       )
       .then((response) => {
-        console.log(response.data);
-        // dispatch(slice.actions.updateUsers({
-        //   users: response.data.data
-        // }))
+        dispatch(
+          slice.actions.updateUsers({
+            users: response.data.data,
+          })
+        );
       })
       .catch((error) => {
         handelError(error, dispatch);
@@ -173,10 +174,11 @@ export function FetchFriends() {
         }
       )
       .then((response) => {
-        console.log(response.data);
-        // dispatch(slice.actions.updateUsers({
-        //   users: response.data.data
-        // }))
+        dispatch(
+          slice.actions.updateFriends({
+            friends: response.data.data,
+          })
+        );
       })
       .catch((error) => {
         handelError(error, dispatch);
@@ -198,10 +200,13 @@ export function FetchFriendsRequest() {
         }
       )
       .then((response) => {
-        console.log(response.data);
-        // dispatch(slice.actions.updateUsers({
-        //   users: response.data.data
-        // }))
+        console.log("FetchFriendsRequest");
+
+        dispatch(
+          slice.actions.updateFriendsRequest({
+            friendsRequest: response.data.data,
+          })
+        );
       })
       .catch((error) => {
         handelError(error, dispatch);

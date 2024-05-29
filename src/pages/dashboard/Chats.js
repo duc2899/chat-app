@@ -38,7 +38,11 @@ const Chats = () => {
     setDialog(true);
   };
   useEffect(() => {
-    socket.emit("get_direct_conversation", { userId }, (data) => {});
+    if (socket) {
+      socket.emit("get_direct_conversation", { userId }, (data) => {
+        console.log(data);
+      });
+    }
   }, []);
   return (
     <Box
