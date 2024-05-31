@@ -84,9 +84,7 @@ const UserElement = ({ img, firstName, lastName, status, _id, check }) => {
     <StyledChatBox
       sx={{
         width: "100%",
-
         borderRadius: 1,
-
         backgroundColor: theme.palette.background.paper,
       }}
       p={2}
@@ -211,8 +209,16 @@ const FriendElement = ({
 }) => {
   const theme = useTheme();
   const { userId } = useSelector((store) => store.auth);
-  const name = `${firstName} ${lastName}`;
 
+  const name = `${firstName} ${lastName}`;
+  const handelCreateMessage = () => {
+    // start a new conversation
+    socket.emit("start_conversation", { to: _id, from: userId }, (res) => {
+      if (res.success) {
+        console.log(res.data);
+      }
+    });
+  };
   return (
     <StyledChatBox
       sx={{
@@ -246,12 +252,7 @@ const FriendElement = ({
           </Stack>
         </Stack>
         <Stack direction={"row"} spacing={2} alignItems={"center"}>
-          <IconButton
-            onClick={() => {
-              // start a new conversation
-              socket.emit("start_conversation", { to: _id, from: userId });
-            }}
-          >
+          <IconButton onClick={handelCreateMessage}>
             <Chat />
           </IconButton>
         </Stack>

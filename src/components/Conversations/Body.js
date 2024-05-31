@@ -1,5 +1,5 @@
 import { Box, Stack, useTheme } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { Chat_History } from "../../data";
 import {
   DocMessage,
@@ -9,12 +9,34 @@ import {
   TextMessage,
   TimeLine,
 } from "./MessageTypes";
+import { useDispatch, useSelector } from "react-redux";
+import { socket } from "../../socket";
+import {
+  FetchCurrentMessages,
+  SetCurrentConversation,
+} from "../../redux/slices/conversations";
 
 const Body = () => {
+  const dispatch = useDispatch();
+
+  const { conversations, current_messages } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
+  const { room_id } = useSelector((state) => state.app);
+
+  useEffect(() => {
+    const current = conversations.find((el) => el?.id === room_id);
+    socket.emit("get_message", { conversation_id: current?.id }, (data) => {
+      // data => list of messages
+      dispatch(FetchCurrentMessages({ messages: data.data }));
+    });
+
+    dispatch(SetCurrentConversation(current));
+  }, []);
   return (
     <Box p={3}>
       <Stack spacing={3}>
-        {Chat_History.map((el, i) => {
+        {current_messages.map((el, i) => {
           switch (el.type) {
             case "divider":
               return <TimeLine el={el} key={i}></TimeLine>;
@@ -29,7 +51,13 @@ const Body = () => {
                 case "reply":
                   return <ReplyMessage key={i} el={el}></ReplyMessage>;
                 default:
-                  return <TextMessage key={i} el={el}></TextMessage>;
+                  return (
+                    <TextMessage
+                      key={i}
+                      el={el}
+                      idConversation={room_id}
+                    ></TextMessage>
+                  );
                 // Text msg
               }
 

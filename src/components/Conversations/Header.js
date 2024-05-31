@@ -18,11 +18,14 @@ import {
   UpdateSidebarType,
   ToggleTextBox,
 } from "../../redux/slices/app";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const Headers = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
+  const { current_conversation } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
 
   return (
     <Box
@@ -51,13 +54,23 @@ const Headers = () => {
             dispatch(UpdateSidebarType("CONTACT"));
           }}
         >
-          <StyledBadge
-            overlap="circular"
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            variant="dot"
-          >
-            <Avatar src={faker.image.avatar()}></Avatar>
-          </StyledBadge>
+          {current_conversation?.online ? (
+            <StyledBadge
+              overlap="circular"
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              variant="dot"
+            >
+              <Avatar
+                alt={current_conversation?.name}
+                src={current_conversation?.img}
+              />
+            </StyledBadge>
+          ) : (
+            <Avatar
+              alt={current_conversation?.name}
+              src={current_conversation?.img}
+            />
+          )}
           <Stack spacing={0.5}>
             <Typography
               variant="subtitle1"
@@ -65,7 +78,7 @@ const Headers = () => {
                 fontWeight: 800,
               }}
             >
-              Linh đáng eo
+              {current_conversation?.name}
             </Typography>
             <Typography
               variant="caption"
@@ -74,7 +87,7 @@ const Headers = () => {
                 color: "#696969",
               }}
             >
-              Online
+              {current_conversation?.online ? "Online" : "Offline"}
             </Typography>
           </Stack>
         </Stack>

@@ -4,11 +4,16 @@ import SideBar from "./SideBar";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { connectSocket, socket } from "../../socket";
-import { ShowSnakeBar } from "../../redux/slices/app";
+import { SelectConversation, ShowSnakeBar } from "../../redux/slices/app";
+import {
+  AddDirectConversation,
+  AddDirectMessage,
+  UpdateDirectConversation,
+} from "../../redux/slices/conversations";
 
 const DashboardLayout = () => {
   const { isLoggedIn } = useSelector((state) => state.auth);
-  const { conversations } = useSelector(
+  const { conversations, current_conversation } = useSelector(
     (state) => state.conversation.direct_chat
   );
   const dispatch = useDispatch();
@@ -16,102 +21,105 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      const onLoadHandler = () => {
+      window.onload = function () {
         if (!window.location.hash) {
           window.location = window.location + "#loaded";
           window.location.reload();
         }
-
-        if (!socket) {
-          connectSocket(userId);
-        }
-
-        socket.on("new_friend_request", (data) => {
-          dispatch(
-            ShowSnakeBar({
-              message: data.message,
-              severity: "success",
-            })
-          );
-        });
-
-        socket.on("request_accepted", (data) => {
-          dispatch(
-            ShowSnakeBar({
-              message: data.message,
-              severity: "success",
-            })
-          );
-        });
-
-        socket.on("request_refuse", (data) => {
-          dispatch(
-            ShowSnakeBar({
-              message: data.message,
-              severity: "success",
-            })
-          );
-        });
-        socket.on("request_sent", (data) => {
-          dispatch(
-            ShowSnakeBar({
-              message: data.message,
-              severity: "success",
-            })
-          );
-        });
-
-        socket.on("start_chat", (data) => {
-          console.log(data);
-          const existing_conversation = conversations.find(
-            (el) => el.id === data._id
-          );
-
-          // Uncomment and adjust the following based on your needs
-          // if(existing_conversation){
-          //   dispatch(UpdateDirectConversation({conversations: data}))
-          // }else{
-          //   dispatch(AddDirectConversation({conversations: data}))
-          // }
-
-          // dispatch(SelectConversation({room_id: data._id}))
-        });
       };
 
-      window.onload = onLoadHandler;
+      window.onload();
 
-      return () => {
-        if (socket) {
-          socket.off("new_friend_request");
-          socket.off("request_accepted");
-          socket.off("request_sent");
-          socket.off("start_chat");
+      if (!socket) {
+        connectSocket(userId);
+      }
+
+      // socket.on("audio_call_notification", (data) => {
+      //   // TODO => dispatch an action to add this in call_queue
+      //   dispatch(PushToAudioCallQueue(data));
+      // });
+
+      // socket.on("video_call_notification", (data) => {
+      //   // TODO => dispatch an action to add this in call_queue
+      //   dispatch(PushToVideoCallQueue(data));
+      // });
+
+      socket.on("new_message", (data) => {
+        const message = data.message;
+
+        // check if msg we got is from currently selected conversation
+        if (current_conversation?.id === data.conversation_id) {
+          dispatch(
+            AddDirectMessage({
+              id: message._id,
+              idConversation: current_conversation?.id,
+              type: "msg",
+              subtype: message.type,
+              message: message.text,
+              incoming: message.to === userId,
+              outgoing: message.from === userId,
+              from: message.from,
+              to: message.to,
+              createdAt: message.createdAt,
+            })
+          );
         }
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, isLoggedIn, socket]);
-
-  useEffect(() => {
-    if (isLoggedIn && !socket) {
-      connectSocket(userId);
-    }
-  }, [isLoggedIn, userId]);
-
-  // Ensure socket is connected once the user logs in
-  useEffect(() => {
-    if (isLoggedIn && socket) {
-      socket.on("connect", () => {
-        console.log("Socket connected");
       });
 
-      return () => {
-        if (socket) {
-          socket.off("connect");
+      socket.on("start_chat", (data) => {
+        console.log(data);
+        // add / update to conversation list
+        const existing_conversation = conversations.find(
+          (el) => el?.id === data._id
+        );
+        if (existing_conversation) {
+          // update direct conversation
+          dispatch(UpdateDirectConversation({ conversation: data }));
+        } else {
+          // add direct conversation
+          dispatch(AddDirectConversation({ conversation: data }));
         }
-      };
+        dispatch(SelectConversation({ room_id: data._id }));
+      });
+
+      socket.on("new_friend_request", (data) => {
+        dispatch(
+          ShowSnakeBar({
+            severity: "success",
+            message: data.message,
+          })
+        );
+      });
+
+      socket.on("request_accepted", (data) => {
+        dispatch(
+          ShowSnakeBar({
+            severity: "success",
+            message: data.message,
+          })
+        );
+      });
+
+      socket.on("request_sent", (data) => {
+        dispatch(ShowSnakeBar({ severity: "success", message: data.message }));
+      });
+
+      socket.on("request_refuse", (data) => {
+        dispatch(ShowSnakeBar({ severity: "success", message: data.message }));
+      });
     }
-  }, [isLoggedIn]);
+
+    // Remove event listener on component unmount
+    return () => {
+      socket?.off("new_friend_request");
+      socket?.off("request_accepted");
+      socket?.off("request_sent");
+      socket?.off("start_chat");
+      socket?.off("new_message");
+      socket?.off("audio_call_notification");
+      socket?.off("request_refuse");
+    };
+  }, [isLoggedIn, socket]);
 
   if (!isLoggedIn) {
     return <Navigate to="/auth/login" />;

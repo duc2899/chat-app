@@ -22,10 +22,12 @@ import Search, {
 import FriendsDialog from "../../sections/main/FriendsDialog";
 import ChatElement from "../../components/ChatElement";
 import { socket } from "../../socket";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { FetchDirectConversations } from "../../redux/slices/conversations";
 
 const Chats = () => {
   const { userId } = useSelector((store) => store.auth);
+  const dispatch = useDispatch();
   const { conversations } = useSelector(
     (state) => state.conversation.direct_chat
   );
@@ -39,8 +41,10 @@ const Chats = () => {
   };
   useEffect(() => {
     if (socket) {
-      socket.emit("get_direct_conversation", { userId }, (data) => {
-        console.log(data);
+      socket.emit("get_direct_conversation", { user_id: userId }, (data) => {
+        if (data.success) {
+          dispatch(FetchDirectConversations({ conversations: data.data }));
+        }
       });
     }
   }, []);

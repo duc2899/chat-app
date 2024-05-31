@@ -19,8 +19,9 @@ import {
 import React from "react";
 import { Link } from "react-router-dom";
 import { Message_options } from "../../data";
+import { socket } from "../../socket";
 
-const TextMessage = ({ el }) => {
+const TextMessage = ({ el, idConversation }) => {
   const theme = useTheme();
   return (
     <Stack
@@ -28,7 +29,9 @@ const TextMessage = ({ el }) => {
       alignItems={"center"}
       justifyContent={el.incoming ? "start" : "end"}
     >
-      {!el.incoming && <MessageOptions />}
+      {!el.incoming && (
+        <MessageOptions id={el.id} idConversation={idConversation} />
+      )}
       <Box
         p={1}
         sx={{
@@ -48,7 +51,9 @@ const TextMessage = ({ el }) => {
           {el.message}
         </Typography>
       </Box>
-      {el.incoming && <MessageOptions />}
+      {el.incoming && (
+        <MessageOptions id={el.id} idConversation={idConversation} />
+      )}
     </Stack>
   );
 };
@@ -268,7 +273,6 @@ const ReplyMessage = ({ el }) => {
           {el.reply}
         </Typography>
       </Box>
-
       {el.incoming && <MessageOptions />}
     </Stack>
   );
@@ -294,7 +298,7 @@ const TimeLine = ({ el }) => {
     </Stack>
   );
 };
-const MessageOptions = () => {
+const MessageOptions = ({ id, idConversation }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -302,6 +306,24 @@ const MessageOptions = () => {
   };
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handelChooseOption = (value) => {
+    switch (value) {
+      case "0":
+        break;
+      case "1":
+        break;
+      case "2":
+        break;
+      case "3":
+        socket.emit("delete_message", {
+          conversation_id: idConversation,
+          messageId: id,
+        });
+        break;
+      default:
+    }
   };
   return (
     <>
@@ -336,7 +358,14 @@ const MessageOptions = () => {
         }}
       >
         {Message_options.map((op, i) => (
-          <MenuItem key={i} onClick={handleClose}>
+          <MenuItem
+            key={i}
+            data-my-value={i}
+            onClick={(e) => {
+              const { myValue } = e.currentTarget.dataset;
+              handelChooseOption(myValue);
+            }}
+          >
             {op.title}
           </MenuItem>
         ))}
