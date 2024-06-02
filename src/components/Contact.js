@@ -22,7 +22,7 @@ import {
   FlagBanner,
   Trash,
 } from "phosphor-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import React, { useState } from "react";
 import { ToggleSidebar, UpdateSidebarType } from "../redux/slices/app";
 import { faker } from "@faker-js/faker";
@@ -77,6 +77,9 @@ const DeleteDialog = ({ open, handleClose }) => {
 const Contact = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
+  const { current_conversation } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
   const [blockDialog, setBlockDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
   const handleCloseBlock = () => {
@@ -145,14 +148,17 @@ const Contact = () => {
             justifyContent={"space-around"}
           >
             <Avatar
-              src={faker.image.avatar()}
+              alt={current_conversation?.name}
+              src={current_conversation?.img}
               sx={{
                 width: 75,
                 height: 75,
               }}
             ></Avatar>
             <Stack>
-              <Typography variant="subtitle1">Nguyen Hai Linh</Typography>
+              <Typography variant="subtitle1">
+                {current_conversation?.name}
+              </Typography>
               <Typography variant="subtitle1">+91 6265 081 928</Typography>
             </Stack>
           </Stack>
@@ -178,11 +184,17 @@ const Contact = () => {
               <Typography variant="subtitle1">Call</Typography>
             </Stack>
           </Stack>
-          <Divider></Divider>
-          <Stack>
-            <Typography variant="subtitle1">About</Typography>
-            <Typography variant="caption">Hi there, I am using </Typography>
-          </Stack>
+          {current_conversation?.about && (
+            <>
+              <Divider></Divider>
+              <Stack>
+                <Typography variant="subtitle1">About</Typography>
+                <Typography variant="caption">
+                  {current_conversation?.about}
+                </Typography>
+              </Stack>
+            </>
+          )}
           <Divider></Divider>
           <Stack width={"100%"}>
             <Stack
@@ -308,7 +320,12 @@ const Contact = () => {
             >
               Block
             </Button>
-            <Button  onClick={() => setDeleteDialog(true)} startIcon={<Trash></Trash>} fullWidth variant="outlined">
+            <Button
+              onClick={() => setDeleteDialog(true)}
+              startIcon={<Trash></Trash>}
+              fullWidth
+              variant="outlined"
+            >
               Delete
             </Button>
           </Stack>

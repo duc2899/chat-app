@@ -1,7 +1,7 @@
 import React from "react";
 import Headers from "./Header";
 import Footer from "./Footer";
-import { Box, Button, IconButton, Stack, useTheme } from "@mui/material";
+import { Button, IconButton, Stack, useTheme } from "@mui/material";
 import Body from "./Body";
 import Search, { SearchIconWrapper, StyledInputBase } from "../Search";
 import {
@@ -13,7 +13,7 @@ import { useSelector } from "../../redux/store";
 import { ToggleTextBox } from "../../redux/slices/app";
 import { useDispatch } from "react-redux";
 
-function Conversation(props) {
+function Conversation() {
   const { searchTextBox } = useSelector((store) => store.app);
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -58,21 +58,7 @@ function Conversation(props) {
         </Stack>
       )}
       {/* Body conversation */}
-      <Box
-        width={"100%"}
-        sx={{
-          flexGrow: 1,
-          height: "100vh",
-          overflowY: "scroll",
-          overflowX: "hidden",
-          backgroundColor:
-            theme.palette.mode === "light"
-              ? "#F0F4FA"
-              : theme.palette.background.paper,
-        }}
-      >
-        <Body></Body>
-      </Box>
+      <Body></Body>
       {/* Footer conversation */}
       <Footer></Footer>
     </Stack>

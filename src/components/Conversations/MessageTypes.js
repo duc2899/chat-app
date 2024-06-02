@@ -20,38 +20,71 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Message_options } from "../../data";
 import { socket } from "../../socket";
+import { useSelector } from "react-redux";
 
-const TextMessage = ({ el, idConversation }) => {
+const TextMessage = ({ el, idConversation, isShow, userId }) => {
   const theme = useTheme();
+
   return (
     <Stack
       direction={"row"}
       alignItems={"center"}
       justifyContent={el.incoming ? "start" : "end"}
     >
-      {!el.incoming && (
+      {!el.incoming && isShow === el.id && (
         <MessageOptions id={el.id} idConversation={idConversation} />
       )}
       <Box
         p={1}
         sx={{
-          backgroundColor: el.incoming
-            ? theme.palette.background.default
-            : theme.palette.primary.main,
+          backgroundColor: (() => {
+            if (el.status === "DELETED") {
+              return "transparent";
+            }
+            return el.incoming
+              ? theme.palette.background.default
+              : theme.palette.primary.main;
+          })(),
+          border:
+            el.status === "DELETED" && `1px solid ${theme.palette.grey[400]}`,
           borderRadius: 1.5,
           width: "max-content",
         }}
       >
-        <Typography
-          variant="body2"
-          sx={{
-            color: el.incoming ? theme.palette.text : "#fff",
-          }}
-        >
-          {el.message}
-        </Typography>
+        {(() => {
+          switch (el.status) {
+            case "NORMAL":
+              return (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: el.incoming ? theme.palette.text : "#fff",
+                  }}
+                >
+                  {el.message}
+                </Typography>
+              );
+            case "DELETED":
+              return (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: theme.palette.text,
+                    fontStyle: "italic",
+                    fontSize: "11px",
+                  }}
+                >
+                  {el.outgoing
+                    ? "You have revoked a message"
+                    : "Message has been revoked"}
+                </Typography>
+              );
+            default:
+              <></>;
+          }
+        })()}
       </Box>
-      {el.incoming && (
+      {el.incoming && isShow === el.id && (
         <MessageOptions id={el.id} idConversation={idConversation} />
       )}
     </Stack>
@@ -317,10 +350,16 @@ const MessageOptions = ({ id, idConversation }) => {
       case "2":
         break;
       case "3":
-        socket.emit("delete_message", {
-          conversation_id: idConversation,
-          messageId: id,
-        });
+        socket.emit(
+          "delete_message",
+          {
+            conversation_id: idConversation,
+            messageId: id,
+          },
+          (res) => {
+            console.log(res);
+          }
+        );
         break;
       default:
     }

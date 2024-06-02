@@ -42,6 +42,7 @@ const Chats = () => {
   useEffect(() => {
     if (socket) {
       socket.emit("get_direct_conversation", { user_id: userId }, (data) => {
+        console.log(data);
         if (data.success) {
           dispatch(FetchDirectConversations({ conversations: data.data }));
         }
@@ -121,14 +122,21 @@ const Chats = () => {
               paddingRight: "10px",
             }}
           >
-            <Stack spacing={1}>
-              <Typography variant="subtitle2">Pinned</Typography>
-              {conversations
-                .filter((el) => el.pinned)
-                .map((el) => (
-                  <ChatElement key={el.id} {...el}></ChatElement>
-                ))}
-            </Stack>
+            {conversations.filter((el) => el.pinned).length !== 0 && (
+              <Stack
+                spacing={1}
+                sx={{
+                  mb: 1,
+                }}
+              >
+                <Typography variant="subtitle2">Pinned</Typography>
+                {conversations
+                  .filter((el) => el.pinned)
+                  .map((el) => (
+                    <ChatElement key={el.id} {...el}></ChatElement>
+                  ))}
+              </Stack>
+            )}
             <Stack spacing={1}>
               <Typography variant="subtitle2">All Chats</Typography>
               {conversations

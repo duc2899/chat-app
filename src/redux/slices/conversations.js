@@ -24,23 +24,22 @@ const slice = createSlice({
         return {
           id: el._id,
           user_id: this_user?._id,
-          img: this_user.avatar,
+          img: this_user?.avatar,
           name: `${this_user.firstName + " " + this_user.lastName}`,
-          msg: this_message.text,
-          time: formatTimeMessage(this_message.createdAt),
+          msg: this_message?.text,
+          time: formatTimeMessage(this_message?.createdAt),
           unread: 2,
-          pinned: true,
-          online: this_user.status === "Online",
-          from: this_message.from,
-          to: this_message.to,
+          pinned: false,
+          online: this_user?.status === "Online",
+          from: this_message?.from,
+          to: this_message?.to,
+          about: this_user?.about,
         };
       });
 
       state.direct_chat.conversations = listConversation;
     },
     updateDirectConversation(state, action) {
-      console.log("go 2");
-
       const this_conversation = action.payload.conversation;
       state.direct_chat.conversations = state.direct_chat.conversations.map(
         (el) => {
@@ -50,16 +49,20 @@ const slice = createSlice({
             const user = this_conversation.participants.find(
               (elm) => elm._id.toString() !== action.payload.user_id
             );
+            const this_message = el.messages[el.messages.length - 1];
             return {
               id: this_conversation._id,
               user_id: user?._id,
-              name: `${user?.firstName} ${user?.lastName}`,
+              name: `${user.firstName + " " + user.lastName}`,
               online: user?.status === "Online",
-              img: user.avatar,
-              msg: faker.music.songName(),
-              time: "9:36",
-              unread: 0,
+              img: user?.avatar,
+              msg: this_message?.text,
+              time: formatTimeMessage(this_message?.createdAt),
+              unread: 2,
               pinned: false,
+              about: user?.about,
+              from: this_message?.from,
+              to: this_message?.to,
             };
           }
         }
@@ -68,7 +71,6 @@ const slice = createSlice({
 
     addDirectConversation(state, action) {
       console.log("go 3");
-
       const this_conversation = action.payload.conversation;
       const user = this_conversation.participants.find(
         (elm) => elm._id.toString() !== action.payload.user_id
@@ -76,21 +78,27 @@ const slice = createSlice({
       state.direct_chat.conversations = state.direct_chat.conversations.filter(
         (el) => el?.id !== this_conversation._id
       );
+      const this_message =
+        this_conversation.messages[this_conversation.messages.length - 1];
       state.direct_chat.conversations.push({
-        id: this_conversation._id._id,
+        id: this_conversation._id,
         user_id: user?._id,
-        name: `${user?.firstName} ${user?.lastName}`,
+        name: `${user.firstName + " " + user.lastName}`,
         online: user?.status === "Online",
-        img: user.avatar,
-        msg: faker.music.songName(),
-        time: "9:36",
-        unread: 0,
+        img: user?.avatar,
+        msg: this_message?.text,
+        time: formatTimeMessage(this_message?.createdAt),
+        unread: 2,
         pinned: false,
+        about: user?.about,
+        from: this_message?.from,
+        to: this_message?.to,
       });
     },
 
     setCurrentConversation(state, action) {
-      state.direct_chat.current_conversation = action.payload;
+      state.direct_chat.current_conversation =
+        action.payload.current_conversation;
     },
 
     fetchCurrentMessages(state, action) {
@@ -102,8 +110,24 @@ const slice = createSlice({
         message: el.text,
         incoming: el.to === action.payload.user_id,
         outgoing: el.from === action.payload.user_id,
+        status: el.status,
       }));
       state.direct_chat.current_messages = formatted_messages;
+    },
+
+    updateCurrentMessages(state, action) {
+      const { deletedMessage, oldCurrentMessages } = action.payload;
+
+      const newCurrentMessages = oldCurrentMessages.map((el) => {
+        if (el.id === deletedMessage._id) {
+          return {
+            ...el,
+            status: deletedMessage.status,
+          };
+        }
+        return el;
+      });
+      state.direct_chat.current_messages = newCurrentMessages;
     },
 
     addDirectMessage(state, action) {
@@ -124,9 +148,14 @@ const slice = createSlice({
 
       state.direct_chat.conversations = newConversation;
     },
+
+    resetState() {
+      return initialState;
+    },
   },
 });
 export const FetchDirectConversations = ({ conversations }) => {
+  // console.log(conversations);
   return async (dispatch, getState) => {
     dispatch(
       slice.actions.fetchDirectConversations({
@@ -160,7 +189,11 @@ export const AddDirectConversation = ({ conversation }) => {
 
 export const SetCurrentConversation = (current_conversation) => {
   return async (dispatch, getState) => {
-    dispatch(slice.actions.setCurrentConversation(current_conversation));
+    dispatch(
+      slice.actions.setCurrentConversation({
+        current_conversation: current_conversation,
+      })
+    );
   };
 };
 
@@ -185,5 +218,23 @@ export const AddDirectMessage = (message) => {
     );
   };
 };
+
+export function ResetStateConversation() {
+  return (dispatch, getState) => {
+    dispatch(slice.actions.resetState());
+  };
+}
+
+export function UpdateCurrentMessages(message) {
+  return (dispatch, getState) => {
+    dispatch(
+      slice.actions.updateCurrentMessages({
+        deletedMessage: message,
+        oldCurrentMessages:
+          getState().conversation.direct_chat.current_messages,
+      })
+    );
+  };
+}
 
 export default slice.reducer;

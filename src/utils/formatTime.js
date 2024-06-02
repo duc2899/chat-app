@@ -25,6 +25,9 @@
 // }
 
 export function formatTimeMessage(time) {
+  if (!time) {
+    return undefined;
+  }
   // Tạo đối tượng Date từ chuỗi ngày giờ ISO
   const date = new Date(time);
 

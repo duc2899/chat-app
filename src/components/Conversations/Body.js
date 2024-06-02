@@ -1,6 +1,5 @@
 import { Box, Stack, useTheme } from "@mui/material";
-import React, { useEffect } from "react";
-import { Chat_History } from "../../data";
+import React, { useEffect, useRef, useState } from "react";
 import {
   DocMessage,
   LinkMessage,
@@ -17,12 +16,18 @@ import {
 } from "../../redux/slices/conversations";
 
 const Body = () => {
+  const theme = useTheme();
   const dispatch = useDispatch();
-
+  const chatContainerRef = useRef(null);
+  const divRef = useRef(null);
   const { conversations, current_messages } = useSelector(
     (state) => state.conversation.direct_chat
   );
+
   const { room_id } = useSelector((state) => state.app);
+  const { userId } = useSelector((state) => state.auth);
+
+  const [showOption, setShowOption] = useState("");
 
   useEffect(() => {
     const current = conversations.find((el) => el?.id === room_id);
@@ -32,38 +37,86 @@ const Body = () => {
     });
 
     dispatch(SetCurrentConversation(current));
-  }, []);
+  }, [room_id, conversations, dispatch]);
+
+  useEffect(() => {
+    // Cuộn xuống cuối khi tin nhắn thay đổi
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [current_messages]);
+
+  const handleMouseOver = (e) => {
+    const datasetValue = e.currentTarget.dataset.id;
+    setShowOption(datasetValue); // In ra giá trị của dataset khi hover
+  };
+
   return (
-    <Box p={3}>
-      <Stack spacing={3}>
+    <Box
+      p={3}
+      width={"100%"}
+      sx={{
+        flexGrow: 1,
+        height: "100vh",
+        overflowY: "scroll",
+        overflowX: "hidden",
+        backgroundColor:
+          theme.palette.mode === "light"
+            ? "#F0F4FA"
+            : theme.palette.background.paper,
+      }}
+      ref={chatContainerRef}
+    >
+      <Stack ref={divRef} data-id="123" spacing={1.5}>
         {current_messages.map((el, i) => {
+          let messageComponent;
           switch (el.type) {
             case "divider":
-              return <TimeLine el={el} key={i}></TimeLine>;
+              messageComponent = <TimeLine el={el} key={i} />;
+              break;
             case "msg":
               switch (el.subtype) {
                 case "img":
-                  return <MediaMessage key={i} el={el}></MediaMessage>;
+                  messageComponent = <MediaMessage key={i} el={el} />;
+                  break;
                 case "doc":
-                  return <DocMessage key={i} el={el}></DocMessage>;
+                  messageComponent = <DocMessage key={i} el={el} />;
+                  break;
                 case "link":
-                  return <LinkMessage key={i} el={el}></LinkMessage>;
+                  messageComponent = <LinkMessage key={i} el={el} />;
+                  break;
                 case "reply":
-                  return <ReplyMessage key={i} el={el}></ReplyMessage>;
+                  messageComponent = <ReplyMessage key={i} el={el} />;
+                  break;
                 default:
-                  return (
+                  messageComponent = (
                     <TextMessage
                       key={i}
                       el={el}
                       idConversation={room_id}
-                    ></TextMessage>
+                      isShow={showOption}
+                      userId={userId}
+                    />
                   );
-                // Text msg
               }
-
+              break;
             default:
-              <></>;
+              messageComponent = null;
           }
+
+          return (
+            <div
+              key={i}
+              data-id={el.id}
+              onMouseOver={handleMouseOver}
+              onMouseLeave={() => {
+                setShowOption("");
+              }}
+            >
+              {messageComponent}
+            </div>
+          );
         })}
       </Stack>
     </Box>

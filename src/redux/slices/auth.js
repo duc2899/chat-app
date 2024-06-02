@@ -10,7 +10,8 @@ import {
   GET_ME,
   UPDATE_ME,
 } from "../../ApiUrl";
-import { ShowSnakeBar } from "./app";
+import { ResetStateApp, ShowSnakeBar } from "./app";
+import { ResetStateConversation } from "./conversations";
 const initialState = {
   user: {},
   isLoggedIn: false,
@@ -34,6 +35,7 @@ const slice = createSlice({
       state.token = action.payload.token;
       state.user = action.payload.user;
       state.userId = action.payload.userId;
+      state.isLoading = false;
     },
     updateRegisterEmail(state, action) {
       state.email = action.payload.email;
@@ -50,6 +52,9 @@ const slice = createSlice({
     fetchUser(state, action) {
       state.user = action.payload.user;
     },
+    resetState() {
+      return initialState;
+    },
   },
 });
 
@@ -63,14 +68,9 @@ const handelError = (error, dispatch) => {
     })
   );
   if (error.response.status === 401) {
-    dispatch(
-      slice.actions.signOut({
-        isLoggedIn: false,
-        token: "",
-        user: {},
-        userId: "",
-      })
-    );
+    dispatch(slice.actions.resetState());
+    dispatch(ResetStateApp());
+    dispatch(ResetStateConversation());
   }
 };
 
@@ -129,14 +129,9 @@ export function LoginUser(formValue) {
 
 export function LogoutOut() {
   return async (dispatch, getValue) => {
-    dispatch(
-      slice.actions.signOut({
-        isLoggedIn: false,
-        token: "",
-        user: {},
-        userId: "",
-      })
-    );
+    dispatch(slice.actions.resetState());
+    dispatch(ResetStateApp());
+    dispatch(ResetStateConversation());
     dispatch(
       ShowSnakeBar({
         message: "Logout Success",
@@ -363,17 +358,25 @@ export function RegisterUser(formValue) {
                     timeExpired: resOTP.data.timeExpired,
                   })
                 );
+
                 window.location.href = "/auth/verify";
               }
+            })
+            .catch((error) => {
+              handelError(error, dispatch);
+            })
+            .finally(() => {
               dispatch(
                 ShowSnakeBar({
                   message: res.data.message,
                   severity: "success",
                 })
               );
-            })
-            .catch((error) => {
-              handelError(error, dispatch);
+              dispatch(
+                slice.actions.toggleLoading({
+                  isLoading: false,
+                })
+              );
             });
         }
       })

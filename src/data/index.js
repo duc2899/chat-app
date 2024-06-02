@@ -259,7 +259,7 @@ const Message_options = [
     title: "Report",
   },
   {
-    title: "Delete Message",
+    title: "Revoke Message",
   },
 ];
 

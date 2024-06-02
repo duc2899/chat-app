@@ -8,6 +8,7 @@ import { SelectConversation, ShowSnakeBar } from "../../redux/slices/app";
 import {
   AddDirectConversation,
   AddDirectMessage,
+  UpdateCurrentMessages,
   UpdateDirectConversation,
 } from "../../redux/slices/conversations";
 
@@ -28,8 +29,6 @@ const DashboardLayout = () => {
         }
       };
 
-      window.onload();
-
       if (!socket) {
         connectSocket(userId);
       }
@@ -48,22 +47,22 @@ const DashboardLayout = () => {
         const message = data.message;
 
         // check if msg we got is from currently selected conversation
-        if (current_conversation?.id === data.conversation_id) {
-          dispatch(
-            AddDirectMessage({
-              id: message._id,
-              idConversation: current_conversation?.id,
-              type: "msg",
-              subtype: message.type,
-              message: message.text,
-              incoming: message.to === userId,
-              outgoing: message.from === userId,
-              from: message.from,
-              to: message.to,
-              createdAt: message.createdAt,
-            })
-          );
-        }
+
+        dispatch(
+          AddDirectMessage({
+            id: message._id,
+            idConversation: data.conversation_id,
+            type: "msg",
+            subtype: message.type,
+            message: message.text,
+            incoming: message.to === userId,
+            outgoing: message.from === userId,
+            from: message.from,
+            to: message.to,
+            createdAt: message.createdAt,
+            status: message.status,
+          })
+        );
       });
 
       socket.on("start_chat", (data) => {
@@ -107,6 +106,10 @@ const DashboardLayout = () => {
       socket.on("request_refuse", (data) => {
         dispatch(ShowSnakeBar({ severity: "success", message: data.message }));
       });
+
+      socket.on("deleted_message", (data) => {
+        dispatch(UpdateCurrentMessages(data.data));
+      });
     }
 
     // Remove event listener on component unmount
@@ -118,6 +121,7 @@ const DashboardLayout = () => {
       socket?.off("new_message");
       socket?.off("audio_call_notification");
       socket?.off("request_refuse");
+      socket?.off("deleted_message");
     };
   }, [isLoggedIn, socket]);
 

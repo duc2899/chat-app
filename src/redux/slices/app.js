@@ -65,6 +65,9 @@ const slice = createSlice({
       state.chat_type = "individual";
       state.room_id = action.payload.room_id;
     },
+    resetState() {
+      return initialState;
+    },
   },
 });
 
@@ -221,5 +224,11 @@ export function SelectConversation({ room_id }) {
         room_id: room_id,
       })
     );
+  };
+}
+
+export function ResetStateApp() {
+  return (dispatch, getState) => {
+    dispatch(slice.actions.resetState());
   };
 }
