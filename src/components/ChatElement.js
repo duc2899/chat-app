@@ -14,6 +14,9 @@ const ChatElement = ({
   id,
   from,
   to,
+  lastActiveAt,
+  status,
+  type,
 }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -25,7 +28,21 @@ const ChatElement = ({
   if (!room_id) {
     isSelected = false;
   }
-
+  const getMessage = () => {
+    switch (status) {
+      case "DELETED":
+        return from === userId
+          ? "You have revoked the message"
+          : "The message has been revoked";
+      default:
+        switch (type) {
+          case "STICKER":
+            return from === userId ? "You: sent a sticker" : "sent a sticker";
+          default:
+            return from === userId ? "You: " + msg : msg;
+        }
+    }
+  };
   return (
     <Box
       sx={{
@@ -48,6 +65,12 @@ const ChatElement = ({
         direction={"row"}
         alignItems={"center"}
         justifyContent={"space-between"}
+        sx={{
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          textOverflow: "ellipsis",
+          width: "100%",
+        }}
       >
         <Stack direction={"row"} spacing={2}>
           {online ? (
@@ -63,18 +86,28 @@ const ChatElement = ({
           )}
           <Stack spacing={0.5}>
             <Typography variant="subtitle2">{name}</Typography>
-
             <Typography
               variant="caption"
               sx={{
                 color: "#9d9d9d",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+                width: "200px",
               }}
             >
-              {from === userId && " You:"} {msg}
+              {getMessage()}
             </Typography>
           </Stack>
         </Stack>
-        <Stack alignItems={"center"} spacing={2}>
+        <Stack
+          alignItems={"center"}
+          justifyContent={"space-between"}
+          spacing={2}
+          sx={{
+            mb: "10px",
+          }}
+        >
           <Typography variant="p" fontSize={12}>
             {time}
           </Typography>

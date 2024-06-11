@@ -1,28 +1,22 @@
-// import { format, getTime, formatDistanceToNow } from "date-fns";
+import moment from "moment-timezone";
 
-// // ----------------------------------------------------------------------
-
-// export function fDate(date) {
-//   return format(new Date(date), "dd MMMM yyyy");
-// }
-
-// export function fDateTime(date) {
-//   return format(new Date(date), "dd MMM yyyy HH:mm");
-// }
-
-// export function fTimestamp(date) {
-//   return getTime(new Date(date));
-// }
-
-// export function fDateTimeSuffix(date) {
-//   return format(new Date(date), "dd/MM/yyyy hh:mm p");
-// }
-
-// export function fToNow(date) {
-//   return formatDistanceToNow(new Date(date), {
-//     addSuffix: true,
-//   });
-// }
+export const userActivityTime = (lastActiveTime) => {
+  const currentTime = moment.tz("Asia/Ho_Chi_Minh").add(7, "hours");
+  const lastActiveMoment = moment.tz(lastActiveTime, "Asia/Ho_Chi_Minh");
+  const duration = moment.duration(currentTime.diff(lastActiveMoment));
+  const minutesDiff = duration.asMinutes();
+  const hoursDiff = duration.asHours();
+  const daysDiff = duration.asDays();
+  if (minutesDiff < 1) {
+    return "Active a few seconds ago";
+  } else if (minutesDiff < 60) {
+    return `Activate ${Math.floor(minutesDiff)} minutes ago`;
+  } else if (hoursDiff < 24) {
+    return `Activate ${Math.floor(hoursDiff)} hours ago`;
+  } else {
+    return `Activate ${Math.floor(daysDiff)} days ago`;
+  }
+};
 
 export function formatTimeMessage(time) {
   if (!time) {

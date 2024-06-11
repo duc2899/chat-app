@@ -19,6 +19,7 @@ import {
   ToggleTextBox,
 } from "../../redux/slices/app";
 import { useDispatch, useSelector } from "react-redux";
+import { userActivityTime } from "../../utils/formatTime";
 
 const Headers = () => {
   const theme = useTheme();
@@ -87,7 +88,9 @@ const Headers = () => {
                 color: "#696969",
               }}
             >
-              {current_conversation?.online ? "Online" : "Offline"}
+              {current_conversation?.online
+                ? "Online"
+                : userActivityTime(current_conversation?.lastActiveAt)}
             </Typography>
           </Stack>
         </Stack>

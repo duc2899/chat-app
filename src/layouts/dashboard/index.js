@@ -7,7 +7,7 @@ import { connectSocket, socket } from "../../socket";
 import { SelectConversation, ShowSnakeBar } from "../../redux/slices/app";
 import {
   AddDirectConversation,
-  AddDirectMessage,
+  AddCurrentMessage,
   UpdateCurrentMessages,
   UpdateDirectConversation,
 } from "../../redux/slices/conversations";
@@ -49,7 +49,7 @@ const DashboardLayout = () => {
         // check if msg we got is from currently selected conversation
 
         dispatch(
-          AddDirectMessage({
+          AddCurrentMessage({
             id: message._id,
             idConversation: data.conversation_id,
             type: "msg",

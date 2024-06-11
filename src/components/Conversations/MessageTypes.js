@@ -7,6 +7,7 @@ import {
   Stack,
   Tooltip,
   Typography,
+  alpha,
   useTheme,
 } from "@mui/material";
 import {
@@ -17,12 +18,11 @@ import {
   Smiley,
 } from "phosphor-react";
 import React from "react";
-import { Link } from "react-router-dom";
 import { Message_options } from "../../data";
 import { socket } from "../../socket";
-import { useSelector } from "react-redux";
+import ReactPlayer from "react-player/youtube";
 
-const TextMessage = ({ el, idConversation, isShow, userId }) => {
+const TextMessage = ({ el, idConversation, isShow }) => {
   const theme = useTheme();
 
   return (
@@ -32,7 +32,11 @@ const TextMessage = ({ el, idConversation, isShow, userId }) => {
       justifyContent={el.incoming ? "start" : "end"}
     >
       {!el.incoming && isShow === el.id && (
-        <MessageOptions id={el.id} idConversation={idConversation} />
+        <MessageOptions
+          id={el.id}
+          idConversation={idConversation}
+          outgoing={el.outgoing}
+        />
       )}
       <Box
         p={1}
@@ -59,6 +63,7 @@ const TextMessage = ({ el, idConversation, isShow, userId }) => {
                   variant="body2"
                   sx={{
                     color: el.incoming ? theme.palette.text : "#fff",
+                    whiteSpace: "pre-wrap",
                   }}
                 >
                   {el.message}
@@ -71,7 +76,6 @@ const TextMessage = ({ el, idConversation, isShow, userId }) => {
                   sx={{
                     color: theme.palette.text,
                     fontStyle: "italic",
-                    fontSize: "11px",
                   }}
                 >
                   {el.outgoing
@@ -85,7 +89,11 @@ const TextMessage = ({ el, idConversation, isShow, userId }) => {
         })()}
       </Box>
       {el.incoming && isShow === el.id && (
-        <MessageOptions id={el.id} idConversation={idConversation} />
+        <MessageOptions
+          id={el.id}
+          idConversation={idConversation}
+          outgoing={el.outgoing}
+        />
       )}
     </Stack>
   );
@@ -190,71 +198,69 @@ const MediaMessage = ({ el }) => {
     </Stack>
   );
 };
-const LinkMessage = ({ el, i }) => {
+const LinkMessage = ({ el, isShow, idConversation }) => {
   const theme = useTheme();
   return (
     <Stack
-      direction={"row"}
+      direction="row"
       alignItems={"center"}
       justifyContent={el.incoming ? "start" : "end"}
-      key={i}
     >
-      {!el.incoming && <MessageOptions />}
-      <Stack spacing={1}>
-        <Box
-          p={1.5}
-          sx={{
-            backgroundColor: el.incoming
-              ? theme.palette.background.default
-              : theme.palette.primary.main,
-            borderRadius: 1.5,
-            width: "max-content",
-          }}
+      {!el.incoming && isShow === el.id && (
+        <MessageOptions
+          id={el.id}
+          idConversation={idConversation}
+          outgoing={el.outgoing}
+        />
+      )}
+      <Box
+        px={1.5}
+        py={1.5}
+        sx={{
+          backgroundColor: el.incoming
+            ? alpha(theme.palette.background.default, 1)
+            : theme.palette.primary.main,
+          borderRadius: 1.5,
+          width: "max-content",
+        }}
+      >
+        <a
+          href={el.message}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ textDecoration: "none" }}
         >
-          <img
-            src={el.preview}
-            alt={el.message}
-            style={{
-              borderRadius: "18px",
-              maxHeight: "210px",
-              marginBottom: "5px",
-            }}
-          ></img>
-          <Stack spacing={1}>
-            <Typography variant="subtitle2">Creating Chat App</Typography>
-            <Typography
-              variant="subtitle2"
+          <Stack spacing={2}>
+            <Stack
+              p={2}
+              direction="column"
+              spacing={3}
+              alignItems="start"
               sx={{
-                color: theme.palette.primary.main,
+                backgroundColor: theme.palette.background.paper,
+                borderRadius: 1,
               }}
-              component={Link}
-              to={"https://www.youtube.com"}
             >
-              www.youtube.com
+              <Stack direction={"column"} spacing={2}>
+                <ReactPlayer url={el.message} width={"100%"} height={150} />
+              </Stack>
+            </Stack>
+            <Typography
+              variant="body2"
+              color={el.incoming ? theme.palette.text.primary : "#fff"}
+            >
+              <div dangerouslySetInnerHTML={{ __html: el.message }}></div>
             </Typography>
           </Stack>
-        </Box>
-        <Box
-          p={1.5}
-          sx={{
-            backgroundColor: el.incoming
-              ? theme.palette.background.default
-              : theme.palette.primary.main,
-            borderRadius: 1.5,
-            width: "max-content",
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{
-              color: el.incoming ? theme.palette.text : "#fff",
-            }}
-          >
-            {el.message}
-          </Typography>
-        </Box>
-      </Stack>
-      {el.incoming && <MessageOptions />}
+        </a>
+      </Box>
+      {el.incoming && isShow === el.id && (
+        <MessageOptions
+          id={el.id}
+          idConversation={idConversation}
+          outgoing={el.outgoing}
+        />
+      )}
     </Stack>
   );
 };
@@ -310,6 +316,39 @@ const ReplyMessage = ({ el }) => {
     </Stack>
   );
 };
+const StickerMessage = ({ el, isShow, idConversation }) => {
+  const theme = useTheme();
+  return (
+    <Stack
+      direction="row"
+      alignItems={"center"}
+      justifyContent={el.incoming ? "start" : "end"}
+    >
+      {!el.incoming && isShow === el.id && (
+        <MessageOptions
+          id={el.id}
+          idConversation={idConversation}
+          outgoing={el.outgoing}
+        />
+      )}
+      <Box>
+        <img
+          src={`https://zalo-api.zadn.vn/api/emoticon/sticker/webpc?eid=${el.message}&size=130&version=1`}
+          alt={`sticker-${el.message}`}
+          style={{ width: 120, height: 120, cursor: "pointer" }}
+        />
+      </Box>
+      {el.incoming && isShow === el.id && (
+        <MessageOptions
+          id={el.id}
+          idConversation={idConversation}
+          outgoing={el.outgoing}
+        />
+      )}
+    </Stack>
+  );
+};
+
 const TimeLine = ({ el }) => {
   const theme = useTheme();
   return (
@@ -331,11 +370,11 @@ const TimeLine = ({ el }) => {
     </Stack>
   );
 };
-const MessageOptions = ({ id, idConversation }) => {
+const MessageOptions = ({ id, idConversation, outgoing }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+    setAnchorEl("a");
   };
   const handleClose = () => {
     setAnchorEl(null);
@@ -350,16 +389,11 @@ const MessageOptions = ({ id, idConversation }) => {
       case "2":
         break;
       case "3":
-        socket.emit(
-          "delete_message",
-          {
-            conversation_id: idConversation,
-            messageId: id,
-          },
-          (res) => {
-            console.log(res);
-          }
-        );
+        socket.emit("delete_message", {
+          conversation_id: idConversation,
+          messageId: id,
+        });
+        handleClose();
         break;
       default:
     }
@@ -396,7 +430,9 @@ const MessageOptions = ({ id, idConversation }) => {
           "aria-labelledby": "basic-button",
         }}
       >
-        {Message_options.map((op, i) => (
+        {Message_options.filter(
+          (op) => !(outgoing === false && op.title === "Revoke Message")
+        ).map((op, i) => (
           <MenuItem
             key={i}
             data-my-value={i}
@@ -419,4 +455,5 @@ export {
   LinkMessage,
   ReplyMessage,
   DocMessage,
+  StickerMessage,
 };

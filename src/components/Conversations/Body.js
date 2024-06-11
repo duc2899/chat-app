@@ -5,6 +5,7 @@ import {
   LinkMessage,
   MediaMessage,
   ReplyMessage,
+  StickerMessage,
   TextMessage,
   TimeLine,
 } from "./MessageTypes";
@@ -25,7 +26,6 @@ const Body = () => {
   );
 
   const { room_id } = useSelector((state) => state.app);
-  const { userId } = useSelector((state) => state.auth);
 
   const [showOption, setShowOption] = useState("");
 
@@ -77,17 +77,34 @@ const Body = () => {
               break;
             case "msg":
               switch (el.subtype) {
-                case "img":
+                case "IMG":
                   messageComponent = <MediaMessage key={i} el={el} />;
                   break;
-                case "doc":
+                case "DOC":
                   messageComponent = <DocMessage key={i} el={el} />;
                   break;
-                case "link":
-                  messageComponent = <LinkMessage key={i} el={el} />;
+                case "LINK":
+                  messageComponent = (
+                    <LinkMessage
+                      key={i}
+                      el={el}
+                      idConversation={room_id}
+                      isShow={showOption}
+                    />
+                  );
                   break;
-                case "reply":
+                case "REPLY":
                   messageComponent = <ReplyMessage key={i} el={el} />;
+                  break;
+                case "STICKER":
+                  messageComponent = (
+                    <StickerMessage
+                      key={i}
+                      el={el}
+                      idConversation={room_id}
+                      isShow={showOption}
+                    ></StickerMessage>
+                  );
                   break;
                 default:
                   messageComponent = (
@@ -96,7 +113,6 @@ const Body = () => {
                       el={el}
                       idConversation={room_id}
                       isShow={showOption}
-                      userId={userId}
                     />
                   );
               }

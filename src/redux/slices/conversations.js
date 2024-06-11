@@ -34,12 +34,16 @@ const slice = createSlice({
           from: this_message?.from,
           to: this_message?.to,
           about: this_user?.about,
+          lastActiveAt: this_user.lastActiveAt,
+          status: this_message?.status,
+          type: this_message?.type,
         };
       });
 
       state.direct_chat.conversations = listConversation;
     },
     updateDirectConversation(state, action) {
+      console.log("go 2");
       const this_conversation = action.payload.conversation;
       state.direct_chat.conversations = state.direct_chat.conversations.map(
         (el) => {
@@ -63,6 +67,7 @@ const slice = createSlice({
               about: user?.about,
               from: this_message?.from,
               to: this_message?.to,
+              status: this_message?.status,
             };
           }
         }
@@ -93,6 +98,7 @@ const slice = createSlice({
         about: user?.about,
         from: this_message?.from,
         to: this_message?.to,
+        status: this_message?.status,
       });
     },
 
@@ -117,7 +123,6 @@ const slice = createSlice({
 
     updateCurrentMessages(state, action) {
       const { deletedMessage, oldCurrentMessages } = action.payload;
-
       const newCurrentMessages = oldCurrentMessages.map((el) => {
         if (el.id === deletedMessage._id) {
           return {
@@ -128,9 +133,25 @@ const slice = createSlice({
         return el;
       });
       state.direct_chat.current_messages = newCurrentMessages;
+
+      const newConversation = state.direct_chat.conversations.map((el) => {
+        if (el.id === deletedMessage.oneToOneMessageId) {
+          return {
+            ...el,
+            from: deletedMessage.from,
+            msg: deletedMessage.message,
+            time: formatTimeMessage(deletedMessage.createdAt),
+            status: deletedMessage.status,
+          };
+        }
+        return el;
+      });
+
+      state.direct_chat.conversations = newConversation;
     },
 
-    addDirectMessage(state, action) {
+    addCurrentMessages(state, action) {
+      console.log("go add message");
       const currentMessage = action.payload.message;
 
       state.direct_chat.current_messages.push(currentMessage);
@@ -141,6 +162,7 @@ const slice = createSlice({
             from: currentMessage.from,
             msg: currentMessage.message,
             time: formatTimeMessage(currentMessage.createdAt),
+            status: currentMessage.status,
           };
         }
         return el;
@@ -208,10 +230,10 @@ export const FetchCurrentMessages = ({ messages }) => {
   };
 };
 
-export const AddDirectMessage = (message) => {
+export const AddCurrentMessage = (message) => {
   return async (dispatch, getState) => {
     dispatch(
-      slice.actions.addDirectMessage({
+      slice.actions.addCurrentMessages({
         message: message,
         conversations: getState().conversation.direct_chat.conversations,
       })

@@ -31,6 +31,7 @@ const Chats = () => {
   const { conversations } = useSelector(
     (state) => state.conversation.direct_chat
   );
+
   const theme = useTheme();
   const [dialog, setDialog] = React.useState(false);
   const handelClose = () => {
@@ -42,7 +43,6 @@ const Chats = () => {
   useEffect(() => {
     if (socket) {
       socket.emit("get_direct_conversation", { user_id: userId }, (data) => {
-        console.log(data);
         if (data.success) {
           dispatch(FetchDirectConversations({ conversations: data.data }));
         }

@@ -21,9 +21,10 @@ import {
 } from "phosphor-react";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { socket } from "../../socket";
 import { useSelector } from "react-redux";
+import Stickers from "./Stickers";
 
 const actions = [
   {
@@ -37,12 +38,6 @@ const actions = [
     icon: <Sticker size={24}></Sticker>,
     y: 172,
     title: "Stickers",
-  },
-  {
-    color: "#0172e4",
-    icon: <Camera size={24}></Camera>,
-    y: 242,
-    title: "Image",
   },
   {
     color: "#0159b2",
@@ -60,7 +55,6 @@ const actions = [
 
 const StyledInput = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-input": {
-    paddingTop: "14px",
     paddingBottom: "14px",
     fontSize: "14px",
   },
@@ -72,18 +66,61 @@ const ChatInput = ({
   setValue,
   value,
   inputRef,
-  onSubmit,
 }) => {
-  const [openActions, setOpenActions] = React.useState(false);
+  const theme = useTheme();
+  const { userId } = useSelector((state) => state.auth);
+  const { current_conversation } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
+  const { room_id } = useSelector((state) => state.app);
+  const handelSendMessage = () => {
+    if (value) {
+      socket.emit("text_message", {
+        message: value,
+        conversation_id: room_id,
+        from: userId,
+        to: current_conversation.user_id,
+        type: containsUrl(value) ? "LINK" : "TEXT",
+      });
+      setValue("");
+    }
+  };
+  const handleKeyDown = (e) => {
+    if ((e.key === "Enter" && e.altKey) || (e.key === "Enter" && e.shiftKey)) {
+      e.preventDefault();
+      const textarea = e.target;
+      const currentCursorPosition = textarea.selectionStart;
+      const textBeforeCursorPosition = textarea.value.substring(
+        0,
+        currentCursorPosition
+      );
+      const textAfterCursorPosition = textarea.value.substring(
+        currentCursorPosition
+      );
+
+      setTimeout(() => {
+        const newText = `${textBeforeCursorPosition}\n${textAfterCursorPosition}`;
+        textarea.value = newText;
+        e.target.selectionStart = e.target.selectionEnd =
+          currentCursorPosition + 1;
+        textarea.scrollTop = textarea.scrollHeight;
+      }, 0);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      handelSendMessage();
+    }
+  };
 
   return (
     <StyledInput
       fullWidth
-      onKeyPress={(e) => {
-        if (e.which === 13) {
-          onSubmit();
-        }
+      multiline
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
+      onKeyDown={handleKeyDown}
       inputRef={inputRef}
       value={value}
       onChange={(event) => {
@@ -93,44 +130,6 @@ const ChatInput = ({
       variant="filled"
       InputProps={{
         disableUnderline: true,
-        startAdornment: (
-          <Stack width={"max-content"}>
-            <Stack
-              sx={{
-                position: "relative",
-                display: openActions ? "inline-block" : "none",
-              }}
-            >
-              {actions.map((action) => (
-                <Tooltip
-                  key={action.y}
-                  title={action.title}
-                  arrow={true}
-                  placement="right"
-                >
-                  <Fab
-                    sx={{
-                      position: "absolute",
-                      top: -action.y,
-                      backgroundColor: action.color,
-                    }}
-                  >
-                    {action.icon}
-                  </Fab>
-                </Tooltip>
-              ))}
-            </Stack>
-            <InputAdornment>
-              <IconButton
-                onClick={() => {
-                  setOpenActions((prev) => !prev);
-                }}
-              >
-                <Link size={32}></Link>
-              </IconButton>
-            </InputAdornment>
-          </Stack>
-        ),
         endAdornment: (
           <InputAdornment>
             <IconButton
@@ -140,6 +139,12 @@ const ChatInput = ({
             >
               <Smiley size={32} />
             </IconButton>
+            <IconButton onClick={handelSendMessage}>
+              <PaperPlaneTilt
+                weight="fill"
+                color={theme.palette.primary.main}
+              ></PaperPlaneTilt>
+            </IconButton>
           </InputAdornment>
         ),
       }}
@@ -147,30 +152,25 @@ const ChatInput = ({
   );
 };
 
-function linkVerify(text) {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  return text.replace(
-    urlRegex,
-    (url) => `<a href="${url}" target="_blank">${url}</a>`
-  );
-}
-
 function containsUrl(text) {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   return urlRegex.test(text);
 }
 
 const Footer = () => {
-  const { userId } = useSelector((state) => state.auth);
-  const { current_conversation } = useSelector(
-    (state) => state.conversation.direct_chat
-  );
-  const { room_id } = useSelector((state) => state.app);
-
   const theme = useTheme();
   const [value, setValue] = useState("");
   const [openPicker, setOpenPicker] = React.useState(false);
   const inputRef = useRef(null);
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? "sticker-popover" : undefined;
 
   function handleEmojiClick(emoji) {
     const input = inputRef.current;
@@ -190,32 +190,30 @@ const Footer = () => {
     }
   }
 
-  const handelSendMessage = () => {
-    if (value) {
-      socket.emit("text_message", {
-        message: linkVerify(value),
-        conversation_id: room_id,
-        from: userId,
-        to: current_conversation.user_id,
-        type: containsUrl(value) ? "LINK" : "TEXT",
-      });
-      setValue("");
+  const handelActions = (e, value) => {
+    if (value === "Stickers") {
+      setAnchorEl(e.currentTarget);
     }
   };
 
   return (
     <Box
-      p={2}
+      pr={2}
+      pl={2}
       sx={{
         width: "100%",
-
         backgroundColor:
           theme.palette.mode === "light"
             ? "#F8FAFF"
             : theme.palette.background.default,
       }}
     >
-      <Stack direction={"row"} spacing={2}>
+      <Stack
+        direction={"row"}
+        spacing={2}
+        alignItems={"flex-end"}
+        justifyContent={"center"}
+      >
         {/* chatInput */}
         <Stack width={"100%"}>
           <Box
@@ -235,30 +233,41 @@ const Footer = () => {
               }}
             />
           </Box>
+
+          <Stickers
+            id={id}
+            open={open}
+            anchorEl={anchorEl}
+            handleClose={handleClose}
+          ></Stickers>
+          <Stack
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "10px",
+              mb: "5px",
+            }}
+          >
+            {actions.map((action) => (
+              <Tooltip
+                key={action.y}
+                title={action.title}
+                arrow={true}
+                placement="top"
+                onClick={(e) => handelActions(e, action.title)}
+              >
+                <IconButton>{action.icon}</IconButton>
+              </Tooltip>
+            ))}
+          </Stack>
           <ChatInput
             inputRef={inputRef}
             value={value}
             setValue={setValue}
             openPicker={openPicker}
             setOpenPicker={setOpenPicker}
-            onSubmit={handelSendMessage}
           />
         </Stack>
-        <Box
-          sx={{
-            backgroundColor: theme.palette.primary.main,
-            height: 48,
-            width: 48,
-            borderRadius: 1.5,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <IconButton onClick={handelSendMessage}>
-            <PaperPlaneTilt color="#fff"></PaperPlaneTilt>
-          </IconButton>
-        </Box>
       </Stack>
     </Box>
   );
